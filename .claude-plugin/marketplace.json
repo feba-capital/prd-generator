@@ -7,7 +7,10 @@
   "plugins": [
     {
       "name": "prd-generator",
-      "source": "./",
+      "source": {
+        "source": "github",
+        "repo": "fabioespindula/prd-generator"
+      },
       "description": "Formal PRD generation workflow"
     }
   ]
