@@ -7,7 +7,7 @@
   "plugins": [
     {
       "name": "prd-generator",
-      "source": ".",
+      "source": "./",
       "description": "Formal PRD generation workflow"
     }
   ]
