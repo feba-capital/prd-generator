@@ -2,3 +2,6 @@
 dist/
 projects/*
 !projects/.gitkeep
+prd-generator.plugin
+prd-generator.skill
+test.txt
