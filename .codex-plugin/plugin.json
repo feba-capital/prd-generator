@@ -1,0 +1,21 @@
+{
+  "name": "prd-generator",
+  "version": "1.0.0",
+  "description": "Formal PRD generation workflow based on international standards, internally adapted by Bill Madeira and structured in this framework by Fabio Espindula",
+  "author": {
+    "name": "Fabio Espindula / FEBACAPITAL"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "PRD Generator",
+    "shortDescription": "Formal PRD workflow with explicit command entry and validation",
+    "longDescription": "Use PRD Generator to run a formal PRD workflow from the explicit /prd-generator command, generate a structured documentation package, validate the output, and keep reusable stack presets and examples aligned.",
+    "developerName": "Fabio Espindula / FEBACAPITAL",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ]
+  }
+}
