@@ -1,0 +1,14 @@
+{
+  "name": "prd-generator-marketplace",
+  "owner": {
+    "name": "Fabio Espindula",
+    "email": "fabio@febacapital.com"
+  },
+  "plugins": [
+    {
+      "name": "prd-generator",
+      "source": ".",
+      "description": "Formal PRD generation workflow"
+    }
+  ]
+}
