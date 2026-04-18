@@ -4,7 +4,7 @@ Banco de perguntas por campo. Use quando o briefing tem ✗ ou ?. Formule via `A
 
 ---
 
-## Batch 1 — Fundação (se faltar qualquer um, pergunte juntos)
+## Batch 1 - Fundação (se faltar qualquer um, pergunte juntos)
 
 ### Nome do projeto
 **Q:** "Qual o nome oficial desse projeto?"
@@ -20,7 +20,7 @@ Banco de perguntas por campo. Use quando o briefing tem ✗ ou ?. Formule via `A
 
 ---
 
-## Batch 2 — Project Type & Stack
+## Batch 2 - Project Type & Stack
 
 ### Project type
 **Q:** "Que tipo de projeto é esse?"
@@ -39,7 +39,7 @@ Banco de perguntas por campo. Use quando o briefing tem ✗ ou ?. Formule via `A
 
 Texto livre. Fabio descreve: framework, DB, linguagem, libs principais.
 Exemplos de respostas válidas:
-- "Next.js 14 App Router + Supabase + Vercel"
+- "Next.js 16 App Router + Supabase + Vercel"
 - "Rails 7 + Supabase (pra auth) + Postgres + Fly.io"
 - "React Native + Expo + Supabase"
 - "Python FastAPI + Postgres + Docker + Fly.io"
@@ -69,7 +69,7 @@ Depois que Fabio responder, **o skill identifica o stack**:
 
 ---
 
-## Batch 3 — Auth & Roles
+## Batch 3 - Auth & Roles
 
 ### Método de autenticação
 **Q:** "Como usuários fazem login?"
@@ -81,7 +81,7 @@ Depois que Fabio responder, **o skill identifica o stack**:
 
 ---
 
-## Batch 4 — Escopo & Entidades
+## Batch 4 - Escopo & Entidades
 
 ### Entidades core (MVP)
 **Q:** "Quais são as 3-5 entidades principais do sistema? (ex: Lead, Campaign, Submission, Report)"
@@ -97,7 +97,7 @@ Depois que Fabio responder, **o skill identifica o stack**:
 
 ---
 
-## Batch Hybrid — Só se stack é híbrido (frontend stack ≠ backend stack)
+## Batch Hybrid - Só se stack é híbrido (frontend stack ≠ backend stack)
 
 Rode esse batch APENAS quando o stack tem frontend e backend diferentes (ex: "Next.js frontend + Python FastAPI backend", "React Native + Rails", "Vue + Go Chi").
 
@@ -113,7 +113,7 @@ Rode esse batch APENAS quando o stack tem frontend e backend diferentes (ex: "Ne
 
 ---
 
-## Batch 5 — Integrações
+## Batch 5 - Integrações
 
 ### Integrações externas de CERTEZA
 **Q:** "Quais APIs/serviços externos o MVP JÁ vai usar? (ex: Stripe, OpenAI, Meta Ads)"

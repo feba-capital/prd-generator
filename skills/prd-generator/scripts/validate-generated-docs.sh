@@ -220,6 +220,44 @@ check_label_shapes() {
   fi
 }
 
+check_version_currency() {
+  local file="$1"
+
+  if grep -Ein '\b(Node(\.js)?[[:space:]]*(20|21|22|23)(\.[0-9]+)?|node@(20|21|22|23)|nvm install[[:space:]]+(20|21|22|23)|FROM[[:space:]]+node:(20|21|22|23)|node:(20|21|22|23)|Next(\.js)?[[:space:]]*(14|15)(\.[0-9]+)?|nextjs[[:space:]]*(14|15)(\.[0-9]+)?)\b' "$file"; then
+    echo "stale runtime/framework version found in $file"
+    FAILED=1
+  fi
+
+  if awk '
+    /^```/ { in_fence = !in_fence; next }
+    in_fence { next }
+    {
+      line = $0
+      gsub(/`[^`]*`/, "", line)
+      low = tolower(line)
+
+      if (low ~ /(node(\.js)?[[:space:]]*24|node[[:space:]]*24)/) {
+        if (low !~ /latest lts/ && low !~ /latest stable/ && low !~ /pinned/ && low !~ /required for/ && low !~ /because/ && low !~ /due to/ && low !~ /reason:/) {
+          print FILENAME ":" NR ": unlabeled current Node reference: " $0
+          failed = 1
+        }
+      }
+
+      if (low ~ /(next\.js[[:space:]]*16|nextjs[[:space:]]*16|next[[:space:]]*16)/) {
+        if (low !~ /latest stable/ && low !~ /pinned/ && low !~ /required for/ && low !~ /because/ && low !~ /due to/ && low !~ /reason:/) {
+          print FILENAME ":" NR ": unlabeled current Next.js reference: " $0
+          failed = 1
+        }
+      }
+    }
+    END { exit failed }
+  ' "$file"; then
+    :
+  else
+    FAILED=1
+  fi
+}
+
 parse_model_fields() {
   local file="$1"
   local out="$2"
@@ -749,6 +787,7 @@ while IFS= read -r file; do
   check_em_dash_in_prose "$file"
   check_placeholders "$file"
   check_label_shapes "$file"
+  check_version_currency "$file"
   check_required_sections "$file"
   check_empty_sections "$file"
 done < <(find "$TARGET_DIR" -type f -name '*.md' | sort)

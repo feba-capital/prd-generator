@@ -31,7 +31,7 @@ Pra cada campo, classifique:
 
 ### Defaults razoáveis (pra não encher de perguntas)
 
-- Owner do PRD: "Fabio / FEBA Capital"
+- Owner do PRD: "Fabio Espindula - FEBACAPITAL"
 - Hosting se Next.js: Vercel
 - Hosting se Yii2/PHP: Docker + DigitalOcean/AWS
 - DB se Next.js: Supabase Postgres

@@ -1,14 +1,14 @@
 # Next.js Best Practices
 
 **Applies to:** All TypeScript code in `app/`, `components/`, `lib/`, `types/`
-**Standard:** Next.js 14 (App Router), Strict TypeScript, ESLint, Biome formatter
+**Standard:** Next.js 16 (latest stable as of 2026-04, 16.2.3 or later, App Router), Strict TypeScript, ESLint, Biome formatter
 **Target:** Production-ready, maintainable, type-safe React applications on Vercel
 
 ---
 
 ## 1. Project Architecture
 
-This project uses **Next.js 14 App Router** with the following structure:
+This project uses **Next.js 16 App Router** with the following structure, aligned to the latest stable release as of 2026-04:
 
 ```
 src/
@@ -56,7 +56,7 @@ app/
 By default, all components in `app/` are Server Components. This is the right choice 95% of the time:
 
 ```tsx
-// app/posts/page.tsx — Server Component (default)
+// app/posts/page.tsx -> Server Component (default)
 // ✓ Can query databases directly
 // ✓ Keeps secrets (API keys, tokens) safe
 // ✓ No JavaScript shipped to client
@@ -86,7 +86,7 @@ Use `"use client"` when you need:
 - Real-time updates via useEffect
 
 ```tsx
-// components/PostForm.tsx — Client Component
+// components/PostForm.tsx -> Client Component
 "use client";
 
 import { useState } from "react";
@@ -235,12 +235,12 @@ export function StatsChart({ initialData }: StatsChartProps) {
 Every function must have explicit parameter and return types:
 
 ```tsx
-// ✗ BAD — missing types
+// ✗ BAD -> missing types
 function getUserStats(userId) {
   return fetch(`/api/stats/${userId}`).then(r => r.json());
 }
 
-// ✓ GOOD — full types
+// ✓ GOOD -> full types
 async function getUserStats(userId: string): Promise<UserStats> {
   const res = await fetch(`/api/stats/${userId}`);
   
@@ -820,7 +820,7 @@ export async function GET(request: NextRequest) {
 
 ### Do NOT fetch data in useEffect from Client Component
 ```tsx
-// ✗ BAD — race conditions, memory leaks
+// ✗ BAD -> race conditions, memory leaks
 "use client";
 import { useEffect, useState } from "react";
 
@@ -834,7 +834,7 @@ export function Posts() {
   }, []); // Missing dependency can cause infinite loops
 }
 
-// ✓ GOOD — fetch in Server Component
+// ✓ GOOD -> fetch in Server Component
 export default async function PostsPage() {
   const posts = await getPosts();
   return <PostList posts={posts} />;
@@ -843,13 +843,13 @@ export default async function PostsPage() {
 
 ### Do NOT pass sensitive data to Client Components
 ```tsx
-// ✗ BAD — API key exposed to client
+// ✗ BAD -> API key exposed to client
 export default async function Page() {
   const apiKey = process.env.SECRET_API_KEY; // ✗ Don't pass this
   return <Component apiKey={apiKey} />;
 }
 
-// ✓ GOOD — keep secret on server
+// ✓ GOOD -> keep secret on server
 export default async function Page() {
   const data = await fetchWithSecret(); // ✓ Fetch server-side
   return <Component data={data} />;
@@ -858,7 +858,7 @@ export default async function Page() {
 
 ### Do NOT use Server Actions from API routes
 ```tsx
-// ✗ BAD — Server Actions are not API routes
+// ✗ BAD -> Server Actions are not API routes
 // lib/actions/post.ts
 "use server";
 
@@ -866,7 +866,7 @@ export async function createPost(data) {
   // This can't be called from API routes, only forms
 }
 
-// ✓ GOOD — create an API route if you need HTTP access
+// ✓ GOOD -> create an API route if you need HTTP access
 // app/api/posts/route.ts
 export async function POST(request: NextRequest) {
   const data = await request.json();
@@ -890,10 +890,10 @@ useEffect(() => {
 
 ### Do NOT store auth tokens in localStorage
 ```tsx
-// ✗ BAD — vulnerable to XSS
+// ✗ BAD -> vulnerable to XSS
 localStorage.setItem("token", token);
 
-// ✓ GOOD — use httpOnly cookies (Supabase handles this)
+// ✓ GOOD -> use httpOnly cookies (Supabase handles this)
 // Supabase automatically manages cookies for you
 ```
 

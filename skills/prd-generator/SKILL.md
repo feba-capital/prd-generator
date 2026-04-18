@@ -9,6 +9,18 @@ Generate an execution-ready PRD package from a brainstorm briefing. Optimized fo
 
 ---
 
+## Version Policy
+
+The skill must never recommend an end-of-life or outdated runtime / framework in generated docs. Rules:
+
+1. At generation time, the skill verifies the current latest stable or LTS of every runtime and framework it plans to mention. Acceptable sources: the project's official release page, endoflife.date, or an equivalent official release tracker.
+2. If the stack preset hardcodes a version that is more than 2 minor releases behind the current stable, the skill overrides the hardcoded value with the current one and notes this in the generated docs: `Updated to latest stable: {version}. Preset hardcode was {old}. See Version Policy.`
+3. If web access is unavailable, the skill uses the hardcoded preset value and writes an `Assumed` entry at the end of the PRD: `Assumed { question: "Latest stable version of {runtime}?", default: "{preset_value}", flip_cost: "low" }`.
+4. No version reference in generated docs is allowed to be unlabeled. Every version mention must either be `latest stable as of {YYYY-MM}` or a specific pinned version with a reason.
+5. End-of-life dates known to be within 3 months of the generation date trigger a red flag in the Implementation Readiness section under `Needs decision before deployment`.
+
+---
+
 ## Core Rule: Do Not Invent Certainty
 
 Anything not explicitly confirmed by Fabio or clearly implied by the briefing must be labeled:
@@ -176,7 +188,7 @@ Copy preset files from `stack-presets/{slug}/` into project `/docs/`.
 
 ### Partial preset match
 Adapt the closest preset. Mark the adjustment as `Assumed { question: "...", default: "...", flip_cost: "low|medium|high" }` in generated docs.
-Example: preset is Next.js 14, project wants Next.js 15 → adapt and label.
+Example: preset says `Next.js 16 (latest stable as of 2026-04)`, but the live stable release has advanced since the preset was last refreshed -> adapt and label.
 
 ### New stack (ad-hoc generation)
 Generate stack docs from scratch. Rules:
@@ -343,9 +355,10 @@ For each policy summary, use this exact structure:
 7. Copy or generate stack docs
 8. Generate root files: README.md, CHANGELOG.md, CLAUDE.md
 9. Build `## Implementation Readiness` from the actual labels present in the generated package, with source file + line citations
-10. Run `PRD_GENERATOR_ALLOW_LEGACY_LABELS=0 bash skills/prd-generator/scripts/validate-generated-docs.sh <project-root>`
-11. Run a Cross-Doc Consistency Pass. If any mismatch remains, stop and list every mismatch before asking Fabio to waive anything.
-12. Report to Fabio
+10. Resolve runtime and framework versions against the Version Policy before finalizing stack docs or setup steps.
+11. Run `PRD_GENERATOR_ALLOW_LEGACY_LABELS=0 bash skills/prd-generator/scripts/validate-generated-docs.sh <project-root>`
+12. Run a Cross-Doc Consistency Pass. If any mismatch remains, stop and list every mismatch before asking Fabio to waive anything.
+13. Report to Fabio
 
 ---
 
@@ -363,8 +376,9 @@ Run automatically before returning to Fabio. Fail loudly on each issue found.
 8. **Workflow-to-endpoint scan.** Every PRD workflow step must reference an endpoint or `UI only`.
 9. **RLS lint scan.** Every non-admin UPDATE policy must have explicit transition text and explicit column/transition enforcement.
 10. **Implementation Readiness scan.** `## Implementation Readiness` must exist, all subsections must be non-empty, and every bullet must cite a source file + line.
+11. **Version currency scan.** Runtime and framework mentions must use current stable or LTS wording, or be pinned with an explicit reason. Bare stale references fail this check.
 
-Do not declare the task complete until all 10 checks pass or Fabio explicitly waives a specific failing item.
+Do not declare the task complete until all 11 checks pass or Fabio explicitly waives a specific failing item.
 
 ---
 

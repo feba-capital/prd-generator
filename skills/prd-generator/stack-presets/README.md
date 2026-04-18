@@ -6,7 +6,7 @@ Stack presets are templates for different technology stacks. Each preset contain
 
 When a PRD skill project selects a stack, the skill:
 1. Checks if a matching preset exists here → copies it into the project's `/docs/`.
-2. If partial match → copies and adapts (e.g., Next.js 14 preset used for Next.js 15 project).
+2. If partial match → copies and adapts (e.g., a Next.js 16 preset refreshed for a newer stable patch line).
 3. If no match → generates a project-local ad-hoc preset first, copies it to the generated project, and only promotes it into this shared library after manual review and a skill sync.
 
 This means the list below grows over time. Do not treat it as a limit on supported stacks.
@@ -62,7 +62,7 @@ Files:
 ### 2. nextjs-supabase
 
 **Slug:** `nextjs-supabase`
-**Tech:** Next.js 14 (App Router), TypeScript, Supabase Postgres (RLS), Tailwind CSS, Vercel
+**Tech:** Next.js 16 (latest stable as of 2026-04, 16.2.3 or later, App Router), TypeScript, Supabase Postgres (RLS), Tailwind CSS, Vercel
 **For:** Full-stack modern apps, multi-tenant SaaS (Fabio preference)
 
 Files:
@@ -195,7 +195,7 @@ When a user creates a project and selects a stack:
 **How to update:**
 
 1. Edit the preset file directly
-2. Use version comments if documenting a version-specific change: `<!-- Since Next.js 13.4 --> ... <!-- Until Next.js 15 -->`
+2. Use version comments if documenting a version-specific change: `<!-- Since Next.js 16.2 --> ... <!-- Until the next stable release -->`
 3. Update PRESET.md if infrastructure or naming changes
 4. Notify users of existing projects if the change is major
 

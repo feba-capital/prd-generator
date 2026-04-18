@@ -1,6 +1,6 @@
 # Next.js + Supabase + Vercel Preset
 
-**Stack:** Next.js 14 (App Router), TypeScript, Supabase Postgres (RLS), Tailwind CSS, Vercel
+**Stack:** Next.js 16 (latest stable as of 2026-04, 16.2.3 or later, App Router), TypeScript, Supabase Postgres (RLS), Tailwind CSS, Vercel
 **Use-case:** Modern, full-stack web applications with built-in auth, multi-tenant isolation, and edge deployment
 
 ---
@@ -9,6 +9,13 @@
 
 - **NEXTJS-BEST-PRACTICES.md** → Coding standards, Server/Client components, data fetching, forms, error handling, testing
 - **SUPABASE-PATTERNS.md** → Row Level Security (RLS), multi-tenant data isolation, security checklist
+
+---
+
+## Prerequisites
+
+- Node.js 24 LTS (latest LTS as of 2026-04, 24.14.1 or later)
+- Always use the latest stable release at project bootstrap. See the Version Policy section of the plugin SKILL.md.
 
 ---
 
@@ -171,7 +178,7 @@ src/
 
 ## Learning Resources
 
-- [Next.js 14 Docs](https://nextjs.org/docs)
+- [Next.js Docs (latest stable)](https://nextjs.org/docs)
 - [Supabase Documentation](https://supabase.com/docs)
 - [Row Level Security Guide](https://supabase.com/docs/guides/auth/row-level-security)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
