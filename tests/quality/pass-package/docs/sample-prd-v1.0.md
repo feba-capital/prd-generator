@@ -24,12 +24,12 @@ Tiny internal snack tracker for one office.
 
 ## 8. Resolved Decisions
 1. The app is single-tenant.
-2. Open restock requests are visible to authenticated users.
+2. Authenticated users can view open restock requests, while requester or admin can also view non-open rows.
 
 ## Implementation Readiness
 
 ### Safe to implement now
-- Shared open queue for authenticated users is confirmed. (source: docs/sample-prd-v1.0.md:16)
+- Open queue visibility is confirmed: authenticated users see open rows, requester or admin can also view non-open rows. (source: docs/sample-prd-v1.0.md:16)
 
 ### Needs explicit decision before coding
 - Initial admin assignment still needs confirmation before implementation starts. (source: docs/sample-prd-v1.0.md:21)

@@ -7,6 +7,7 @@ FAILED=0
 SEP=$'\034'
 EM_DASH="$(printf '\342\200\224')"
 TMP_DIR="$(mktemp -d)"
+ROLE_VOCAB="${PRD_GENERATOR_ROLE_VOCAB:-owner,driver,copilot,member,admin,service_role,authenticated,anon}"
 trap 'rm -rf "$TMP_DIR"' EXIT
 
 normalize_expr() {
@@ -90,15 +91,15 @@ check_required_sections() {
       require_heading "$file" '^## Strict Transition Example'
       ;;
     *-prd-v*.md)
-      require_heading "$file" '^## .*Overview'
-      require_heading "$file" '^### .*Goals'
-      require_heading "$file" '^### .*Non-Goals'
+      require_heading "$file" '^## .*(Overview|Visão Geral)'
+      require_heading "$file" '^### .*(Goals|Objetivos)'
+      require_heading "$file" '^### .*(Non-Goals|Não Objetivos)'
       require_heading "$file" '^## .*Resolved Decisions'
-      require_heading "$file" '^## Implementation Readiness'
-      require_heading "$file" '^### Safe to implement now'
-      require_heading "$file" '^### Needs explicit decision before coding'
-      require_heading "$file" '^### Needs decision before deployment \(non-blocking for coding\)'
-      require_heading "$file" '^### Intentionally deferred from this version'
+      require_heading "$file" '^## (Implementation Readiness|Prontidão para Implementação)'
+      require_heading "$file" '^### (Safe to implement now|Seguro para implementar agora)'
+      require_heading "$file" '^### (Needs explicit decision before coding|Precisa de decisão explícita antes de codar)'
+      require_heading "$file" '^### (Needs decision before deployment \(non-blocking for coding\)|Precisa de decisão antes do deploy \(não bloqueia codificação\))'
+      require_heading "$file" '^### (Intentionally deferred from this version|Intencionalmente adiado desta versão)'
       ;;
   esac
 }
@@ -350,14 +351,21 @@ parse_endpoint_contracts() {
   awk -v sep="$SEP" '
     function flush() {
       if (endpoint != "") {
-        print endpoint sep table sep policy sep access sep fields
+        print endpoint sep endpoint_line sep table sep policy sep access sep fields sep section sep description
       }
-      endpoint = table = policy = access = fields = ""
+      endpoint = endpoint_line = table = policy = access = fields = description = ""
     }
+    /^# Confirmed Endpoints/ { flush(); section = "confirmed"; next }
+    /^# Proposed Endpoints/ { flush(); section = "proposed"; next }
     /^### (GET|POST|PUT|PATCH|DELETE) \/api\/v[0-9.]+\// {
       flush()
       endpoint = $0
       sub(/^### /, "", endpoint)
+      endpoint_line = NR
+      next
+    }
+    endpoint != "" && description == "" && $0 !~ /^[[:space:]]*$/ && $0 !~ /^\*\*/ && $0 !~ /^---$/ {
+      description = $0
       next
     }
     /^\*\*Table:\*\* `/ {
@@ -394,18 +402,20 @@ parse_workflow_refs() {
   local file="$1"
   local out="$2"
   awk -v sep="$SEP" '
-    /^## .*Core Workflows/ { in_workflows = 1; next }
+    /^## .*(Core Workflows|Fluxos Principais)/ { in_workflows = 1; next }
     in_workflows && /^## / { in_workflows = 0 }
     in_workflows && /^[0-9]+\./ {
       line = $0
       if (line !~ /`[^`]+`/) {
-        print "__MISSING_REFERENCE__" sep NR sep $0
+        print "__MISSING_REFERENCE__" sep "__MISSING_REFERENCE__" sep NR sep $0
         next
       }
       while (match(line, /`[^`]+`/)) {
         ref = substr(line, RSTART + 1, RLENGTH - 2)
+        base_ref = ref
+        sub(/[[:space:]]+\([^)]*\)$/, "", base_ref)
         if (ref !~ /^UI only/) {
-          print ref sep NR sep $0
+          print ref sep base_ref sep NR sep $0
         }
         line = substr(line, RSTART + RLENGTH)
       }
@@ -419,9 +429,17 @@ parse_supabase_policies() {
   awk -v sep="$SEP" '
     function flush() {
       if (name != "") {
-        print name sep operation sep access sep transition sep enforced sep using sep with_check
+        sql_body = using
+        if (with_check != "") {
+          if (sql_body != "") {
+            sql_body = sql_body " " with_check
+          } else {
+            sql_body = with_check
+          }
+        }
+        print name sep name_line sep operation sep access sep transition sep enforced sep using sep with_check sep sql_body
       }
-      name = operation = access = transition = enforced = using = with_check = ""
+      name = name_line = operation = access = transition = enforced = using = with_check = ""
     }
     /^```sql/ { in_sql = 1; next }
     in_sql && /^```/ { in_sql = 0; flush(); next }
@@ -446,6 +464,7 @@ parse_supabase_policies() {
       name = $0
       sub(/^CREATE POLICY[[:space:]]+/, "", name)
       sub(/[[:space:]].*$/, "", name)
+      name_line = NR
       access = pending_access
       transition = pending_transition
       enforced = pending_enforced
@@ -476,6 +495,248 @@ parse_supabase_policies() {
       }
     }
   ' "$file" | sort > "$out"
+}
+
+extract_role_csv() {
+  local text="$1"
+  printf '%s\n' "$text" | awk '
+    function add(role) {
+      if (role == "") return
+      roles[role] = 1
+    }
+    {
+      text = tolower($0)
+      gsub(/driver_membership_id/, "driver", text)
+      gsub(/copilot_membership_id/, "copilot", text)
+      gsub(/_/, " ", text)
+      gsub(/bu[[:space:]]+driver/, "driver", text)
+      gsub(/business[[:space:]]+unit[[:space:]]+driver/, "driver", text)
+      gsub(/bu[[:space:]]+copilot/, "copilot", text)
+      gsub(/business[[:space:]]+unit[[:space:]]+copilot/, "copilot", text)
+      gsub(/service[[:space:]]+role/, "service_role", text)
+      gsub(/service-role/, "service_role", text)
+      gsub(/authenticated users?/, "authenticated", text)
+      gsub(/anonymous users?/, "anon", text)
+
+      if (text ~ /(^|[^[:alpha:]_])owner([^[:alpha:]_]|$)/) add("owner")
+      if (text ~ /(^|[^[:alpha:]_])driver([^[:alpha:]_]|$)/) add("driver")
+      if (text ~ /(^|[^[:alpha:]_])copilot([^[:alpha:]_]|$)/) add("copilot")
+      if (text ~ /(^|[^[:alpha:]_])member([^[:alpha:]_]|$)/) add("member")
+      if (text ~ /(^|[^[:alpha:]_])admin([^[:alpha:]_]|$)/) add("admin")
+      if (text ~ /(^|[^[:alpha:]_])service_role([^[:alpha:]_]|$)/) add("service_role")
+      if (text ~ /(^|[^[:alpha:]_])authenticated([^[:alpha:]_]|$)/) add("authenticated")
+      if (text ~ /(^|[^[:alpha:]_])anon([^[:alpha:]_]|$)/) add("anon")
+    }
+    END {
+      order[1] = "owner"
+      order[2] = "driver"
+      order[3] = "copilot"
+      order[4] = "member"
+      order[5] = "admin"
+      order[6] = "service_role"
+      order[7] = "authenticated"
+      order[8] = "anon"
+      first = 1
+      for (i = 1; i <= 8; i++) {
+        role = order[i]
+        if (roles[role]) {
+          printf "%s%s", (first ? "" : ","), role
+          first = 0
+        }
+      }
+    }
+  '
+}
+
+format_role_set() {
+  local csv="$1"
+  local formatted=""
+  local item
+  [ -n "$csv" ] || {
+    printf '{}'
+    return 0
+  }
+  OLDIFS="$IFS"
+  IFS=','
+  for item in $csv; do
+    [ -n "$item" ] || continue
+    formatted="${formatted}${formatted:+, }$item"
+  done
+  IFS="$OLDIFS"
+  printf '{%s}' "$formatted"
+}
+
+extract_action_csv() {
+  local text="$1"
+  printf '%s\n' "$text" | awk '
+    function add(action) {
+      if (action == "") return
+      actions[action] = 1
+    }
+    {
+      line = tolower($0)
+      if (line ~ /(^|[^[:alpha:]])(approval|approve|approves|approving|rejection|reject|rejects|rejecting)([^[:alpha:]]|$)/) add("approve")
+      if (line ~ /\/approvals([^[:alpha:]]|$)/ || line ~ /\/reject([^[:alpha:]]|$)/) add("approve")
+      if (line ~ /(^|[^[:alpha:]])(create|creates|created|creating|install|seed|invite|assign|submit|write)([^[:alpha:]]|$)/) add("create")
+      if (line ~ /(^|[^[:alpha:]])(edit|update|change|modify|promote|reassign|switch)([^[:alpha:]]|$)/) add("edit")
+      if (line ~ /(^|[^[:alpha:]])(delete|remove|revoke|cancel)([^[:alpha:]]|$)/) add("delete")
+      if (line ~ /(^|[^[:alpha:]])(view|read|open|see|list|review|download|return)([^[:alpha:]]|$)/) add("view")
+      if (line ~ /get \/api\//) add("view")
+      if (line ~ /post \/api\// && line !~ /approvals/) add("create")
+      if (line ~ /(patch|put) \/api\//) add("edit")
+      if (line ~ /delete \/api\//) add("delete")
+    }
+    END {
+      order[1] = "approve"
+      order[2] = "create"
+      order[3] = "edit"
+      order[4] = "delete"
+      order[5] = "view"
+      first = 1
+      for (i = 1; i <= 5; i++) {
+        action = order[i]
+        if (actions[action]) {
+          printf "%s%s", (first ? "" : ","), action
+          first = 0
+        }
+      }
+    }
+  '
+}
+
+action_csv_contains() {
+  local csv="$1"
+  local needle="$2"
+  case ",$csv," in
+    *",$needle,"*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+parse_prd_access_claims() {
+  local file="$1"
+  local out="$2"
+  awk -v sep="$SEP" '
+    function trim(value) {
+      sub(/^[[:space:]]+/, "", value)
+      sub(/[[:space:]]+$/, "", value)
+      return value
+    }
+    function emit(line_text) {
+      print NR sep line_text
+    }
+    /^```/ { in_fence = !in_fence; next }
+    in_fence { next }
+    {
+      line = $0
+      gsub(/`[^`]*`/, "", line)
+      lower = tolower(line)
+
+      if (line ~ /^\|/ && line !~ /^\|---/) {
+        split(line, parts, "|")
+        role_col = trim(parts[2])
+        body = ""
+        for (i = 3; i <= length(parts); i++) {
+          body = body " " trim(parts[i])
+        }
+        lower_body = tolower(body)
+        if (tolower(role_col) ~ /(owner|driver|copilot|member|admin|service role|authenticated|anon)/ && lower_body ~ /(approv|create|edit|delete|view|read|list|open|review|invite|assign|revoke|cancel)/) {
+          emit(role_col " " body)
+          next
+        }
+      }
+
+      if (lower ~ /(owner|driver|copilot|member|admin|service role|authenticated|anon)/ && lower ~ /(approv|approval|create|edit|delete|view|read|list|open|review|invite|assign|revoke|cancel)/) {
+        emit(line)
+      }
+    }
+  ' "$file" > "$out"
+}
+
+emit_unknown_role_warning() {
+  local file="$1"
+  local line_number="$2"
+  local raw_text="$3"
+  local unknown=""
+
+  if printf '%s' "$raw_text" | grep -Eq '^\|'; then
+    unknown="$(printf '%s\n' "$raw_text" | awk '
+      function trim(value) {
+        sub(/^[[:space:]]+/, "", value)
+        sub(/[[:space:]]+$/, "", value)
+        return value
+      }
+      {
+        split($0, parts, "|")
+        print trim(parts[2])
+      }
+    ')"
+  else
+    unknown="$(printf '%s\n' "$raw_text" | sed -nE 's/.*requires a ([A-Z][A-Za-z_ ]+) approval.*/\1/p')"
+  fi
+
+  [ -n "$unknown" ] || return 0
+
+  local normalized
+  normalized="$(printf '%s' "$unknown" | tr '[:upper:]' '[:lower:]' | sed -E 's/bu[[:space:]]+driver/driver/g; s/business[[:space:]]+unit[[:space:]]+driver/driver/g; s/bu[[:space:]]+copilot/copilot/g; s/business[[:space:]]+unit[[:space:]]+copilot/copilot/g; s/service[[:space:]]+role/service_role/g; s/^[[:space:]]+//; s/[[:space:]]+$//')"
+
+  case ",$ROLE_VOCAB," in
+    *",$normalized,"*) ;;
+    *) echo "WARN access-control-consistency: unknown role vocabulary [$unknown] in $file:$line_number" ;;
+  esac
+}
+
+extract_workflow_qualifier() {
+  local step_text="$1"
+  local raw_ref="$2"
+  local roles_csv states_csv anchor_qualifier
+
+  roles_csv="$(extract_role_csv "$step_text")"
+  states_csv="$(printf '%s\n' "$step_text" | awk '
+    function add(state) {
+      if (state == "") return
+      states[state] = 1
+    }
+    {
+      line = tolower($0)
+      if (line ~ /awaiting_approval/) add("awaiting_approval")
+      if (line ~ /approved/) add("approved")
+      if (line ~ /rejected/) add("rejected")
+      if (line ~ /draft/) add("draft")
+      if (line ~ /submitted/) add("submitted")
+      if (line ~ /open/) add("open")
+      if (line ~ /cancelled/) add("cancelled")
+      if (line ~ /when[[:space:]]+status/) add("status_clause")
+      if (line ~ /when[[:space:]]/) add("when_clause")
+      if (line ~ /if[[:space:]]/) add("if_clause")
+      if (line ~ /after[[:space:]]/) add("after_clause")
+      if (line ~ /before[[:space:]]/) add("before_clause")
+    }
+    END {
+      order[1] = "awaiting_approval"
+      order[2] = "approved"
+      order[3] = "rejected"
+      order[4] = "draft"
+      order[5] = "submitted"
+      order[6] = "open"
+      order[7] = "cancelled"
+      order[8] = "status_clause"
+      order[9] = "when_clause"
+      order[10] = "if_clause"
+      order[11] = "after_clause"
+      order[12] = "before_clause"
+      first = 1
+      for (i = 1; i <= 12; i++) {
+        state = order[i]
+        if (states[state]) {
+          printf "%s%s", (first ? "" : ","), state
+          first = 0
+        }
+      }
+    }
+  ')"
+  anchor_qualifier="$(printf '%s\n' "$raw_ref" | sed -nE 's/^[^(]+\(([^)]*)\)$/\1/p')"
+  printf '%s%s%s%s%s' "$roles_csv" "$SEP" "$states_csv" "$SEP" "$anchor_qualifier"
 }
 
 check_policy_guard_reference() {
@@ -552,12 +813,14 @@ check_cross_doc_consistency() {
   local endpoint_contracts_file="$TMP_DIR/endpoint-contracts.tsv"
   local workflow_refs_file="$TMP_DIR/workflow-refs.tsv"
   local supabase_policies_file="$TMP_DIR/supabase-policies.tsv"
+  local prd_claims_file="$TMP_DIR/prd-access-claims.tsv"
 
   parse_model_fields "$models_file" "$model_fields_file"
   parse_model_policies "$models_file" "$model_policies_file"
   parse_endpoint_contracts "$endpoints_file" "$endpoint_contracts_file"
   parse_workflow_refs "$prd_file" "$workflow_refs_file"
   parse_supabase_policies "$supabase_file" "$supabase_policies_file"
+  parse_prd_access_claims "$prd_file" "$prd_claims_file"
 
   while IFS="$SEP" read -r name table operation access using with_check enforced; do
     [ -n "$name" ] || continue
@@ -570,8 +833,8 @@ check_cross_doc_consistency() {
       continue
     fi
 
-    local sql_name sql_operation sql_access sql_transition sql_enforced sql_using sql_with_check
-    IFS="$SEP" read -r sql_name sql_operation sql_access sql_transition sql_enforced sql_using sql_with_check <<EOF
+    local sql_name sql_line sql_operation sql_access sql_transition sql_enforced sql_using sql_with_check sql_body
+    IFS="$SEP" read -r sql_name sql_line sql_operation sql_access sql_transition sql_enforced sql_using sql_with_check sql_body <<EOF
 $sql_row
 EOF
 
@@ -591,7 +854,7 @@ EOF
     fi
   done < "$model_policies_file"
 
-  while IFS="$SEP" read -r endpoint table policy access fields; do
+  while IFS="$SEP" read -r endpoint endpoint_line table policy access fields section description; do
     [ -n "$endpoint" ] || continue
 
     if [ -z "$policy" ]; then
@@ -638,7 +901,7 @@ EOF
     fi
   done < "$endpoint_contracts_file"
 
-  while IFS="$SEP" read -r reference line_number raw_line; do
+  while IFS="$SEP" read -r reference base_reference line_number raw_line; do
     [ -n "$reference" ] || continue
 
     if [ "$reference" = "__MISSING_REFERENCE__" ]; then
@@ -647,11 +910,232 @@ EOF
       continue
     fi
 
-    if ! cut -d "$SEP" -f 1 "$endpoint_contracts_file" | grep -Fxq "$reference"; then
+    if ! cut -d "$SEP" -f 1 "$endpoint_contracts_file" | grep -Fxq "$base_reference"; then
       echo "$prd_file:$line_number: workflow reference [$reference] is not defined in $endpoints_file"
       FAILED=1
     fi
   done < "$workflow_refs_file"
+
+  while IFS="$SEP" read -r claim_line claim_text; do
+    [ -n "$claim_text" ] || continue
+
+    emit_unknown_role_warning "$prd_file" "$claim_line" "$claim_text"
+
+    local prd_actions prd_roles
+    prd_actions="$(extract_action_csv "$claim_text")"
+    prd_roles="$(extract_role_csv "$claim_text")"
+    [ -n "$prd_actions" ] || continue
+    [ -n "$prd_roles" ] || continue
+
+    local action
+    IFS=',' read -r -a action_parts <<< "$prd_actions"
+    for action in "${action_parts[@]}"; do
+      [ -n "$action" ] || continue
+
+      local endpoint_matches=0 endpoint_roles="" endpoint_role_set="" endpoint_source="" policy_source="" rls_roles="" rls_role_set="" ambiguous_match=0
+      while IFS="$SEP" read -r endpoint endpoint_line table policy access fields section description; do
+        [ -n "$endpoint" ] || continue
+        [ "$section" = "confirmed" ] || continue
+        local endpoint_actions
+        endpoint_actions="$(extract_action_csv "$endpoint $description")"
+        action_csv_contains "$endpoint_actions" "$action" || continue
+
+        endpoint_matches=$((endpoint_matches + 1))
+        local candidate_endpoint_roles candidate_endpoint_role_set candidate_endpoint_source
+        local candidate_rls_roles="" candidate_rls_role_set="" candidate_policy_source=""
+        candidate_endpoint_roles="$(extract_role_csv "$policy $access")"
+        candidate_endpoint_role_set="$(format_role_set "$candidate_endpoint_roles")"
+        candidate_endpoint_source="$endpoints_file:$endpoint_line"
+
+        local sql_row
+        sql_row="$(grep -F "${policy}${SEP}" "$supabase_policies_file" | head -n 1 || true)"
+        if [ -n "$sql_row" ]; then
+          local sql_name sql_line sql_operation sql_access sql_transition sql_enforced sql_using sql_with_check sql_body
+          IFS="$SEP" read -r sql_name sql_line sql_operation sql_access sql_transition sql_enforced sql_using sql_with_check sql_body <<EOF
+$sql_row
+EOF
+          candidate_rls_roles="$(extract_role_csv "$sql_access $sql_body")"
+          if [ -n "$candidate_rls_roles" ]; then
+            candidate_rls_role_set="$(format_role_set "$candidate_rls_roles")"
+            candidate_policy_source="$supabase_file:$sql_line"
+          fi
+        fi
+
+        if [ -z "$endpoint_roles" ] && [ -z "$rls_roles" ]; then
+          endpoint_roles="$candidate_endpoint_roles"
+          endpoint_role_set="$candidate_endpoint_role_set"
+          endpoint_source="$candidate_endpoint_source"
+          rls_roles="$candidate_rls_roles"
+          rls_role_set="$candidate_rls_role_set"
+          policy_source="$candidate_policy_source"
+          continue
+        fi
+
+        if [ "$endpoint_roles" != "$candidate_endpoint_roles" ] || [ "$rls_roles" != "$candidate_rls_roles" ]; then
+          ambiguous_match=1
+        fi
+      done < "$endpoint_contracts_file"
+
+      if [ "$endpoint_matches" -eq 0 ] || [ "$ambiguous_match" -eq 1 ]; then
+        continue
+      fi
+
+      local prd_role_set
+      prd_role_set="$(format_role_set "$prd_roles")"
+
+      if [ -n "$endpoint_roles" ] && [ "$prd_roles" != "$endpoint_roles" ]; then
+        echo "FAIL access-control-consistency: action \"$action\" roles disagree"
+        echo "  $prd_file:$claim_line -> $prd_role_set"
+        echo "  $endpoint_source -> $endpoint_role_set"
+        if [ -n "$rls_roles" ]; then
+          echo "  $policy_source -> $rls_role_set"
+        fi
+        FAILED=1
+      elif [ -n "$rls_roles" ] && [ "$endpoint_roles" != "$rls_roles" ]; then
+        echo "FAIL access-control-consistency: action \"$action\" roles disagree"
+        echo "  $prd_file:$claim_line -> $prd_role_set"
+        echo "  $endpoint_source -> $endpoint_role_set"
+        echo "  $policy_source -> $rls_role_set"
+        FAILED=1
+      fi
+    done
+  done < "$prd_claims_file"
+}
+
+check_workflow_anchor_uniqueness() {
+  local prd_file="$1"
+  local workflow_refs_file="$TMP_DIR/workflow-anchor-uniqueness.tsv"
+  parse_workflow_refs "$prd_file" "$workflow_refs_file"
+
+  awk -v sep="$SEP" -v role_vocab="$ROLE_VOCAB" -v prd_file="$prd_file" '
+    BEGIN {
+      FS = sep
+    }
+    function trim(value) {
+      sub(/^[[:space:]]+/, "", value)
+      sub(/[[:space:]]+$/, "", value)
+      return value
+    }
+    function add_token(map, key) {
+      if (key == "") return
+      map[key] = 1
+    }
+    function role_csv(line,    text, role, first) {
+      delete roles
+      text = tolower(line)
+      gsub(/bu[[:space:]]+driver/, "driver", text)
+      gsub(/business[[:space:]]+unit[[:space:]]+driver/, "driver", text)
+      gsub(/bu[[:space:]]+copilot/, "copilot", text)
+      gsub(/business[[:space:]]+unit[[:space:]]+copilot/, "copilot", text)
+      gsub(/service[[:space:]]+role/, "service_role", text)
+      if (text ~ /(^|[^[:alpha:]_])owner([^[:alpha:]_]|$)/) roles["owner"] = 1
+      if (text ~ /(^|[^[:alpha:]_])driver([^[:alpha:]_]|$)/) roles["driver"] = 1
+      if (text ~ /(^|[^[:alpha:]_])copilot([^[:alpha:]_]|$)/) roles["copilot"] = 1
+      if (text ~ /(^|[^[:alpha:]_])member([^[:alpha:]_]|$)/) roles["member"] = 1
+      if (text ~ /(^|[^[:alpha:]_])admin([^[:alpha:]_]|$)/) roles["admin"] = 1
+      text = ""
+      order[1] = "owner"
+      order[2] = "driver"
+      order[3] = "copilot"
+      order[4] = "member"
+      order[5] = "admin"
+      first = 1
+      for (role = 1; role <= 5; role++) {
+        if (roles[order[role]]) {
+          text = text (first ? "" : ",") order[role]
+          first = 0
+        }
+      }
+      return text
+    }
+    function state_csv(line,    text, key, first) {
+      delete states
+      text = tolower(line)
+      if (text ~ /awaiting_approval/) states["awaiting_approval"] = 1
+      if (text ~ /approved/) states["approved"] = 1
+      if (text ~ /rejected/) states["rejected"] = 1
+      if (text ~ /draft/) states["draft"] = 1
+      if (text ~ /submitted/) states["submitted"] = 1
+      if (text ~ /open/) states["open"] = 1
+      if (text ~ /cancelled/) states["cancelled"] = 1
+      if (text ~ /when[[:space:]]+status/) states["status_clause"] = 1
+      if (text ~ /when[[:space:]]/) states["when_clause"] = 1
+      if (text ~ /if[[:space:]]/) states["if_clause"] = 1
+      if (text ~ /after[[:space:]]/) states["after_clause"] = 1
+      if (text ~ /before[[:space:]]/) states["before_clause"] = 1
+      text = ""
+      order[1] = "awaiting_approval"
+      order[2] = "approved"
+      order[3] = "rejected"
+      order[4] = "draft"
+      order[5] = "submitted"
+      order[6] = "open"
+      order[7] = "cancelled"
+      order[8] = "status_clause"
+      order[9] = "when_clause"
+      order[10] = "if_clause"
+      order[11] = "after_clause"
+      order[12] = "before_clause"
+      first = 1
+      for (key = 1; key <= 12; key++) {
+        if (states[order[key]]) {
+          text = text (first ? "" : ",") order[key]
+          first = 0
+        }
+      }
+      return text
+    }
+    function clean_text(line,    cleaned) {
+      cleaned = line
+      gsub(/`[^`]*`/, "", cleaned)
+      cleaned = trim(cleaned)
+      return cleaned
+    }
+    {
+      raw_ref = $1
+      base_ref = $2
+      line_no = $3
+      text = $4
+      if (base_ref == "__MISSING_REFERENCE__" || raw_ref ~ /^UI only/) next
+      key = base_ref
+      count[key]++
+      idx = key sep count[key]
+      refs[idx] = raw_ref
+      lines[idx] = line_no
+      texts[idx] = clean_text(text)
+      roles[idx] = role_csv(text)
+      states[idx] = state_csv(text)
+      qualifier = raw_ref
+      sub(/^[^(]+\(/, "", qualifier)
+      sub(/\)$/, "", qualifier)
+      if (qualifier == raw_ref) qualifier = ""
+      anchor_qualifiers[idx] = qualifier
+    }
+    END {
+      failed = 0
+      for (key in count) {
+        if (count[key] < 2) continue
+        for (i = 1; i < count[key]; i++) {
+          idx_i = key sep i
+          for (j = i + 1; j <= count[key]; j++) {
+            idx_j = key sep j
+            same_text = texts[idx_i] == texts[idx_j]
+            same_role = roles[idx_i] == roles[idx_j]
+            same_state = states[idx_i] == states[idx_j]
+            same_anchor_qualifier = anchor_qualifiers[idx_i] == anchor_qualifiers[idx_j]
+            no_distinguishing_qualifier = same_role && same_state && same_anchor_qualifier
+            if (same_text || no_distinguishing_qualifier) {
+              print "FAIL workflow-anchor-uniqueness: endpoint \"" key "\" appears in steps " lines[idx_i] " and " lines[idx_j] " with no distinguishing role, state, or qualifier"
+              print "  " prd_file ":" lines[idx_i] " -> \"" texts[idx_i] "\""
+              print "  " prd_file ":" lines[idx_j] " -> \"" texts[idx_j] "\""
+              failed = 1
+            }
+          }
+        }
+      }
+      exit failed
+    }
+  ' "$workflow_refs_file" || FAILED=1
 }
 
 check_rls_lint() {
@@ -663,7 +1147,7 @@ check_rls_lint() {
   parse_model_policies "$models_file" "$model_policies_file"
   parse_supabase_policies "$supabase_file" "$supabase_policies_file"
 
-  while IFS="$SEP" read -r name operation access transition enforced using with_check; do
+  while IFS="$SEP" read -r name name_line operation access transition enforced using with_check sql_body; do
     [ -n "$name" ] || continue
 
     if [ "$operation" != "UPDATE" ]; then
@@ -738,22 +1222,22 @@ check_implementation_readiness() {
         print "implementation readiness subsection is empty in " file ": " section
         failed = 1
       }
-      if (section == "### Needs explicit decision before coding" && (blocking_count + assumed_blocking_count) > 0 && none_marker == 1) {
+      if ((section == "### Needs explicit decision before coding" || section == "### Precisa de decisão explícita antes de codar") && (blocking_count + assumed_blocking_count) > 0 && none_marker == 1) {
         print "blocking decisions exist but readiness section says none in " file
         failed = 1
       }
-      if (section == "### Needs decision before deployment (non-blocking for coding)" && non_blocking_count > 0 && none_marker == 1) {
+      if ((section == "### Needs decision before deployment (non-blocking for coding)" || section == "### Precisa de decisão antes do deploy (não bloqueia codificação)") && non_blocking_count > 0 && none_marker == 1) {
         print "non-blocking TBD items exist but readiness section says none in " file
         failed = 1
       }
-      if (section == "### Intentionally deferred from this version" && deferred_count > 0 && none_marker == 1) {
+      if ((section == "### Intentionally deferred from this version" || section == "### Intencionalmente adiado desta versão") && deferred_count > 0 && none_marker == 1) {
         print "deferred Proposed items exist but readiness section says none in " file
         failed = 1
       }
       bullet_count = 0
       none_marker = 0
     }
-    /^## Implementation Readiness/ { in_readiness = 1; next }
+    /^## (Implementation Readiness|Prontidão para Implementação)/ { in_readiness = 1; next }
     in_readiness && /^## / {
       flush()
       in_readiness = 0
@@ -769,7 +1253,7 @@ check_implementation_readiness() {
         print "implementation readiness bullet missing source citation in " file ": " $0
         failed = 1
       }
-      if ($0 ~ /^- None\./) {
+      if ($0 ~ /^- (None\.|Nenhum\.)/) {
         none_marker = 1
       }
       next
@@ -778,6 +1262,93 @@ check_implementation_readiness() {
       if (in_readiness) {
         flush()
       }
+      exit failed
+    }
+  ' "$prd_file" || FAILED=1
+}
+
+check_mutually_exclusive_sections() {
+  local prd_file="$1"
+  local has_future has_launch
+
+  if grep -Eq '^## (Future Versions|Versões Futuras)' "$prd_file"; then
+    has_future=1
+  else
+    has_future=0
+  fi
+
+  if grep -Eq '^## (Launch Dependencies|Dependências de Lançamento)' "$prd_file"; then
+    has_launch=1
+  else
+    has_launch=0
+  fi
+
+  if [ "$has_future" -eq 1 ] && [ "$has_launch" -eq 1 ]; then
+    echo "mutually exclusive sections present in $prd_file: Future Versions and Launch Dependencies"
+    FAILED=1
+  fi
+}
+
+check_scope_decisions_justification() {
+  local prd_file="$1"
+  awk -v file="$prd_file" '
+    function flush_item() {
+      if (in_scope && item_open && reason_found == 0) {
+        print "scope decision item missing reason in " file ": " item_line
+        failed = 1
+      }
+      reason_found = 0
+      item_open = 0
+      item_line = 0
+    }
+    /^## (Scope Decisions|Decisões de Escopo)/ {
+      in_scope = 1
+      flush_item()
+      next
+    }
+    in_scope && /^## / {
+      flush_item()
+      in_scope = 0
+    }
+    !in_scope { next }
+    /^- / {
+      flush_item()
+      item_open = 1
+      item_line = NR
+      next
+    }
+    item_open && /(Reason|Motivo):[[:space:]]*[^[:space:]]/ {
+      reason_found = 1
+      next
+    }
+    END {
+      if (in_scope) {
+        flush_item()
+      }
+      exit failed
+    }
+  ' "$prd_file" || FAILED=1
+}
+
+check_validation_plan_completeness() {
+  local prd_file="$1"
+  awk -v file="$prd_file" '
+    /^## (Validation Plan|Plano de Validação)/ {
+      in_plan = 1
+      next
+    }
+    in_plan && /^## / { in_plan = 0 }
+    !in_plan { next }
+    /(Sample size|Tamanho da amostra):/ { sample = 1 }
+    /(Time window|Janela de tempo):/ { window = 1 }
+    /(Success metric|Métrica de sucesso):/ { metric = 1 }
+    /(Kill threshold|Limite de encerramento):/ { threshold = 1 }
+    END {
+      if (!sample && !window && !metric && !threshold) exit 0
+      if (!sample) { print "validation plan missing field [Sample size] in " file; failed = 1 }
+      if (!window) { print "validation plan missing field [Time window] in " file; failed = 1 }
+      if (!metric) { print "validation plan missing field [Success metric] in " file; failed = 1 }
+      if (!threshold) { print "validation plan missing field [Kill threshold] in " file; failed = 1 }
       exit failed
     }
   ' "$prd_file" || FAILED=1
@@ -792,18 +1363,26 @@ while IFS= read -r file; do
   check_empty_sections "$file"
 done < <(find "$TARGET_DIR" -type f -name '*.md' | sort)
 
+PRD_FILE=""
+if find "$TARGET_DIR" -type f -name '*-prd-v*.md' | grep -q .; then
+  PRD_FILE="$(find "$TARGET_DIR" -type f -name '*-prd-v*.md' | sort | head -n 1)"
+  check_implementation_readiness "$PRD_FILE"
+  check_mutually_exclusive_sections "$PRD_FILE"
+  check_scope_decisions_justification "$PRD_FILE"
+  check_validation_plan_completeness "$PRD_FILE"
+fi
+
 if find "$TARGET_DIR" -type f -name '*-prd-v*.md' | grep -q . && \
    find "$TARGET_DIR" -type f -name 'api-endpoints.md' | grep -q . && \
    find "$TARGET_DIR" -type f -name 'api-models.md' | grep -q . && \
    find "$TARGET_DIR" -type f -name 'SUPABASE-PATTERNS.md' | grep -q .; then
-  PRD_FILE="$(find "$TARGET_DIR" -type f -name '*-prd-v*.md' | sort | head -n 1)"
   ENDPOINTS_FILE="$(find "$TARGET_DIR" -type f -name 'api-endpoints.md' | sort | head -n 1)"
   MODELS_FILE="$(find "$TARGET_DIR" -type f -name 'api-models.md' | sort | head -n 1)"
   SUPABASE_FILE="$(find "$TARGET_DIR" -type f -name 'SUPABASE-PATTERNS.md' | sort | head -n 1)"
 
   check_cross_doc_consistency "$PRD_FILE" "$ENDPOINTS_FILE" "$MODELS_FILE" "$SUPABASE_FILE"
+  check_workflow_anchor_uniqueness "$PRD_FILE"
   check_rls_lint "$MODELS_FILE" "$SUPABASE_FILE"
-  check_implementation_readiness "$PRD_FILE"
 fi
 
 exit "$FAILED"

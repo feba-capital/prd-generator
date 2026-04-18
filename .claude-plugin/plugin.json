@@ -1,6 +1,6 @@
 {
   "name": "prd-generator",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Formal PRD generation workflow based on international standards, internally adapted by Bill Madeira and structured in this plugin by Fabio",
   "author": {
     "name": "Fabio Espindula",

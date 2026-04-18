@@ -85,14 +85,98 @@ If Fabio refuses to answer, switch to `fast-draft` and mark gaps clearly.
 
 ---
 
-## Discovery Workflow
+## Interaction Workflow
 
 This workflow only runs after explicit invocation through `/prd-generator` or a direct request for the formal `prd-generator` workflow.
 
-### Step 1. Read the freeform briefing
-Extract what is already known. Do not re-ask anything the briefing already answers. See `interview/briefing-parser.md` for how to extract.
+### Step 0. Language selection
+Ask first, before any other interaction, using `interview/language-question.md`.
 
-### Step 2. Build internal decision checklist
+Options:
+
+1. `English` (default)
+2. `Brazilian Portuguese`
+3. `Other, specify`
+
+The chosen language applies to:
+
+- the conversation
+- the generated docs
+- any handoff message to another skill
+
+If the user chooses a language other than English or Brazilian Portuguese, proceed and note the quality caveat. Do not block.
+
+### Step 1. Brainstorm-readiness check
+Ask `Is this idea already brainstormed, or still raw?` using `interview/brainstorm-readiness.md`.
+
+Options:
+
+1. `Already brainstormed` -> proceed to Step 2
+2. `Still raw` -> offer handoff to `product-management:brainstorm` or `product-management:product-brainstorming`
+
+If the brainstorm skill is unavailable, fall back to plain-text capture:
+
+`No brainstorm skill available. Describe the idea in your own words and I will treat your description as the starting brief.`
+
+No hidden state is persisted across skills. If the user leaves for brainstorming, they must re-run `/prd-generator`.
+
+### Step 2. Optional MVP check
+Offer the MVP check using `interview/mvp-check.md`:
+
+`Want to run a quick MVP check? 7 questions, helps avoid a bloated v1. Skip if you already thought through the scope.`
+
+Options:
+
+1. `Run the check`
+2. `Skip, I already scoped it`
+
+If the user skips, proceed directly to Step 3 with no extra friction.
+
+Fast path rule: the added interaction for users who skip Step 1 handoff and skip Step 2 must stay under 30 seconds.
+
+If the user runs it, ask the 7 questions in order with 2 opinionated options plus 1 free-text fallback. The signal mappings from `interview/mvp-check.md` are mandatory:
+
+- Q3 option 3 -> skip `Future Versions`, add `Launch Dependencies`
+- Q7 option 3 -> add `Validation Plan`
+
+After the 7 questions, assemble the scope contract from `interview/scope-contract.md`.
+
+### Step 2.5. Optional scope contract export
+If Step 2 ran, ask:
+
+`Want me to save this scope contract as a standalone file? Useful to share with stakeholders without sending the full PRD.`
+
+Options:
+
+1. `Yes, save to projects/{slug}/scope-contract.md`
+2. `No, keep it inside the PRD only`
+
+The saved scope contract must be readable standalone in under 2 minutes by a non-technical stakeholder.
+
+### Override pattern
+After presenting the scope contract, ask:
+
+`This is the recommended skateboard. You can:
+1. Proceed with this skateboard for the PRD.
+2. Add features to v1 that you consider essential even if they fall outside the recommendation. Which?
+3. Rewrite the skateboard from scratch.`
+
+Behavior:
+
+- Option 1 -> proceed with the recommended skateboard
+- Option 2 -> capture each added feature plus one follow-up `Why is this essential for v1?`; log each pair in `## Scope Decisions`
+- Option 3 -> capture the rewritten v1 scope in free text; honor it; log that the recommendation was rejected in `## Scope Decisions`
+
+The recommendation is advisory. The user's override is always honored. Do not argue or force the recommendation back in.
+
+### Step 3. Read the scoped briefing
+Extract what is already known from the freeform briefing. Do not re-ask anything the briefing already answers. See `interview/briefing-parser.md`.
+
+If Step 2 ran, prefix the interview intro with:
+
+`Now I will ask about the skateboard we just defined, not the full vision.`
+
+### Step 4. Build internal decision checklist
 Classify these 14 fields as `confirmed`, `partial`, or `missing`:
 
 1. Project name
@@ -110,15 +194,15 @@ Classify these 14 fields as `confirmed`, `partial`, or `missing`:
 13. Deploy / infra
 14. Observability / ops
 
-### Step 3. Ask only high-leverage questions
+### Step 5. Ask only high-leverage questions
 Ask in batches of 2 to 4 only after the formal workflow has been explicitly invoked. Rules:
 
 - Prioritize architecture-changing questions (multi-tenant yes/no, auth method, project type)
 - Never ask what the briefing already answered
-- Do not ask UI/polish details
+- Do not ask UI or polish details
 - For hybrid stacks, ask the hybrid batch in `interview/questions.md` (repo split + contract ownership)
 
-### Step 4. Confirm summary before generating
+### Step 6. Confirm summary before generating
 Show Fabio a short summary:
 
 - Name
@@ -224,7 +308,11 @@ Required interview questions for hybrid (see `interview/questions.md` Batch Hybr
 ## Output Rules
 
 ### Language
-All generated files MUST be in English. Conversation with Fabio can be Portuguese or English.
+Use the language chosen in Step 0 for the conversation and generated docs.
+
+- English remains the authoring default.
+- Brazilian Portuguese must translate user-facing headings and intros in the PRD and scope contract.
+- Any other language is accepted with a quality caveat. Do not block generation.
 
 ### Formatting
 - **Never use em dash in prose.** Use arrow, comma, period, colon, or rephrase. The punctuation itself is allowed only inside code fences, inline backticks, regex examples, shell examples, or literal "what not to do" references.
@@ -259,6 +347,23 @@ Every bullet in this section must cite a concrete source file and line in the fo
 ---
 
 ## File Quality Requirements
+
+## Step 4 Conditional Sections
+
+When Step 2 ran, Step 4 generation must emit the following sections conditionally:
+
+- `## Future Versions` -> only when Step 2 ran and Q3 was not option 3
+- `## Launch Dependencies` -> only when Step 2 ran and Q3 was option 3
+- `## Validation Plan` -> only when Step 2 ran and Q7 was option 3
+- `## Scope Decisions` -> only when Step 2 ran and the override pattern used option 2 or 3
+
+Rules:
+
+- `Future Versions` and `Launch Dependencies` are mutually exclusive. Never emit both.
+- Every item in `Future Versions` must use `Proposed { promote_when: "..." }`.
+- Every item in `Scope Decisions` must include a non-empty `reason`.
+- `Validation Plan` must include all four fields: sample size, time window, success metric, kill threshold.
+- If Step 2 did not run, none of the four sections are required.
 
 ### Main PRD must include
 - problem
@@ -346,19 +451,24 @@ For each policy summary, use this exact structure:
 
 ## Practical Generation Order
 
-1. Confirm summary with Fabio (Step 4 of Discovery)
-2. Create folder `/projects/{project-slug}/` and its `/docs/` subfolder
-3. Generate main PRD (densest file, anchor for everything else)
-4. Generate AGENTS.md
-5. Generate DEVELOPMENT-WORKFLOW.md
-6. Generate project-type-specific docs (api-*, screens, etc.)
-7. Copy or generate stack docs
-8. Generate root files: README.md, CHANGELOG.md, CLAUDE.md
-9. Build `## Implementation Readiness` from the actual labels present in the generated package, with source file + line citations
-10. Resolve runtime and framework versions against the Version Policy before finalizing stack docs or setup steps.
-11. Run `PRD_GENERATOR_ALLOW_LEGACY_LABELS=0 bash skills/prd-generator/scripts/validate-generated-docs.sh <project-root>`
-12. Run a Cross-Doc Consistency Pass. If any mismatch remains, stop and list every mismatch before asking Fabio to waive anything.
-13. Report to Fabio
+1. Run Step 0 language selection.
+2. Run Step 1 brainstorm-readiness check.
+3. Offer Step 2 MVP check. If accepted, assemble the scope contract, run the override pattern, and offer Step 2.5 export.
+4. Confirm summary with Fabio (Step 6 of the interaction workflow).
+5. Create folder `/projects/{project-slug}/` and its `/docs/` subfolder.
+6. Generate the main PRD (densest file, anchor for everything else).
+7. If Step 2 ran, embed `## Scope Contract (v1)` in the main PRD and save `scope-contract.md` when Step 2.5 requested it.
+8. Generate `AGENTS.md`.
+9. Generate `DEVELOPMENT-WORKFLOW.md`.
+10. Generate project-type-specific docs (`api-*`, `screens`, etc.).
+11. Copy or generate stack docs.
+12. Generate root files: `README.md`, `CHANGELOG.md`, `CLAUDE.md`.
+13. Emit conditional PRD sections from Step 2 signals: `Future Versions`, `Launch Dependencies`, `Validation Plan`, `Scope Decisions`.
+14. Build `## Implementation Readiness` from the actual labels present in the generated package, with source file + line citations.
+15. Resolve runtime and framework versions against the Version Policy before finalizing stack docs or setup steps.
+16. Run `PRD_GENERATOR_ALLOW_LEGACY_LABELS=0 bash skills/prd-generator/scripts/validate-generated-docs.sh <project-root>`.
+17. Run a Cross-Doc Consistency Pass. If any mismatch remains, stop and list every mismatch before asking Fabio to waive anything.
+18. Report to Fabio.
 
 ---
 
@@ -376,9 +486,14 @@ Run automatically before returning to Fabio. Fail loudly on each issue found.
 8. **Workflow-to-endpoint scan.** Every PRD workflow step must reference an endpoint or `UI only`.
 9. **RLS lint scan.** Every non-admin UPDATE policy must have explicit transition text and explicit column/transition enforcement.
 10. **Implementation Readiness scan.** `## Implementation Readiness` must exist, all subsections must be non-empty, and every bullet must cite a source file + line.
-11. **Version currency scan.** Runtime and framework mentions must use current stable or LTS wording, or be pinned with an explicit reason. Bare stale references fail this check.
+11. **Access-control consistency scan.** Role claims in the PRD must agree with the endpoint access block and the underlying RLS policy for the same action.
+12. **Workflow-anchor uniqueness scan.** Reused endpoint anchors across workflow steps must carry distinct role, state, or anchor qualifiers. Duplicate indistinguishable anchors fail.
+13. **Version currency scan.** Runtime and framework mentions must use current stable or LTS wording, or be pinned with an explicit reason. Bare stale references fail this check.
+14. **Mutually exclusive sections scan.** `Future Versions` and `Launch Dependencies` must never both appear in the same PRD.
+15. **Scope Decisions justification scan.** Every item under `Scope Decisions` must include a non-empty `reason`.
+16. **Validation Plan completeness scan.** If `Validation Plan` exists, sample size, time window, success metric, and kill threshold must all be present.
 
-Do not declare the task complete until all 11 checks pass or Fabio explicitly waives a specific failing item.
+Do not declare the task complete until all 16 checks pass or Fabio explicitly waives a specific failing item.
 
 ---
 

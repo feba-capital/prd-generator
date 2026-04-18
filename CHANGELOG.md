@@ -4,6 +4,30 @@ All notable changes to the `prd-generator` plugin are documented in this file.
 
 ## [Unreleased]
 
+## Sprint 2: v2 Flow Redesign
+
+### Added
+- Added Step 0 language selection so the PRD workflow can run in English, Brazilian Portuguese, or a user-specified language with a quality caveat.
+- Added Step 1 brainstorm-readiness so raw ideas can hand off cleanly to brainstorming before the formal PRD workflow starts.
+- Added Step 2 optional MVP check with the 7-question scope contract flow, the override pattern, and optional standalone scope-contract export.
+- Added Sprint 2 quality gates for mutually exclusive `Future Versions` vs `Launch Dependencies`, `Scope Decisions` justifications, and `Validation Plan` completeness.
+- Added Sprint 2 regression fixtures covering language cascade, future versions, launch dependencies, validation plans, scope overrides, rewrite flows, and the scope-contract export path.
+
+### Changed
+- Updated the main PRD template to emit `Future Versions`, `Launch Dependencies`, `Validation Plan`, and `Scope Decisions` only when the Step 2 signals require them.
+- Updated the validator to understand PT-BR PRD headings and readiness sections while keeping backward compatibility for pre-Sprint 2 English packages such as Orchestrix.
+- Minor-bumped the plugin for the v2 entry-flow redesign and the expanded 16-gate quality check.
+
+## Sprint 1.5: Validator Hardening
+
+### Added
+- Added `access-control-consistency` to the validator so role claims in the PRD, endpoint contracts, and underlying RLS policy text must agree for the same action.
+- Added `workflow-anchor-uniqueness` to the validator so duplicate workflow endpoint anchors now require a distinct role, state, or anchor qualifier.
+- Added dedicated pass and fail fixtures for both new checks, wired into the existing validator harness.
+
+### Changed
+- Patch-bumped the plugin after expanding the quality gate from 11 to 13 checks.
+
 ## Hotfix: Version Policy
 
 ### Changed
