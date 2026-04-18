@@ -6,7 +6,7 @@
   },
   "plugins": [
     {
-      "name": "prd-generator",
+      "name": "prd-generator-v2",
       "source": {
         "source": "github",
         "repo": "fabioespindula/prd-generator"
