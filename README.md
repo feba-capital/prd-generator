@@ -96,13 +96,14 @@ Start here:
 1. Edit files under `skills/prd-generator/`, `commands/`, `docs/`, or `tests/`.
 2. Run `bash tests/test-validate-generated-docs.sh`.
 3. Run `bash tests/test-sprint-1-regressions.sh`.
-4. Rebuild the `.plugin` artifact locally when needed.
+4. If the Claude plugin behavior changed, bump `.claude-plugin/plugin.json`, push the changes, and refresh or reinstall from the GitHub marketplace.
 
 ## Packaging and GitHub
 
 This repository is kept source-only for GitHub.
 
-- Build artifacts belong in `dist/` locally.
+- The recommended Claude distribution path is the GitHub marketplace defined in `.claude-plugin/marketplace.json`.
+- Local packaged artifacts are optional development output, not the canonical installation path.
 - Generated project output should not be committed here unless it is an intentional frozen example under `examples/`.
 
 ## Backward compatibility

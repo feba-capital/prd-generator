@@ -14,4 +14,4 @@ This repository is the source of truth for the `prd-generator` Claude workflow.
 - Live product code
 - Auto-generated output in the root `docs/`
 - Hidden LLM orchestration outside Claude
-- Committed build artifacts under `dist/`
+- Local packaged artifacts as part of the canonical GitHub installation path
