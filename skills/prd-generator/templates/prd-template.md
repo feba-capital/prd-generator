@@ -89,7 +89,7 @@ schema, migration). Keep template placeholders ({{...}}) unchanged.
 
 ---
 
-## 2. Data Model
+## 3. Data Model
 
 {{/MULTITENANT_YES_NO}}{{^MULTITENANT_YES_NO}}
 ## 2. Authentication & Users
@@ -136,7 +136,7 @@ If multi-tenant, add `tenant_id` to all tenant-scoped tables.
 ---
 
 {{#MULTITENANT_YES_NO}}
-## 3. Core Workflows
+## 4. Core Workflows
 {{/MULTITENANT_YES_NO}}{{^MULTITENANT_YES_NO}}
 ## 4. Core Workflows
 {{/MULTITENANT_YES_NO}}
@@ -159,7 +159,7 @@ Rules:
 ---
 
 {{#MULTITENANT_YES_NO}}
-## 4. API Design
+## 5. API Design
 {{/MULTITENANT_YES_NO}}{{^MULTITENANT_YES_NO}}
 ## 5. API Design
 {{/MULTITENANT_YES_NO}}
@@ -202,7 +202,7 @@ Cursor-based (`?cursor=&limit=`) with `next_cursor` in response.
 ---
 
 {{#MULTITENANT_YES_NO}}
-## 5. Infrastructure & Operations
+## 6. Infrastructure & Operations
 
 ### Database
 - MySQL 8+, InnoDB, utf8mb4
@@ -222,9 +222,9 @@ Cursor-based (`?cursor=&limit=`) with `next_cursor` in response.
 
 ---
 
-## 6. Security & Audit
+## 7. Security & Audit
 {{/MULTITENANT_YES_NO}}{{^MULTITENANT_YES_NO}}
-## 5. Infrastructure & Operations
+## 6. Infrastructure & Operations
 
 ### Hosting
 - {{HOSTING}}
@@ -239,7 +239,7 @@ Cursor-based (`?cursor=&limit=`) with `next_cursor` in response.
 
 ---
 
-## 6. Security & Audit
+## 7. Security & Audit
 {{/MULTITENANT_YES_NO}}
 
 - {{AUTH_METHOD}} + short-lived tokens
@@ -250,7 +250,7 @@ Cursor-based (`?cursor=&limit=`) with `next_cursor` in response.
 
 ---
 
-## 7. Out of Scope for v{{VERSION}} (Deferred)
+## 8. Out of Scope for v{{VERSION}} (Deferred)
 
 {{#NON_GOALS}}
 - {{. }}
@@ -286,7 +286,7 @@ Each bullet should describe one dependency that must ship together with v1.
 {{/SHOW_LAUNCH_DEPENDENCIES}}
 {{/STEP2_RAN}}
 
-## 8. Open Questions & Assumptions
+## 9. Open Questions & Assumptions
 
 <!-- Use only the classified uncertainty labels:
 
@@ -300,7 +300,7 @@ Keep this section compact. Only include real unresolved items.
 
 ---
 
-## 9. Resolved Decisions (v{{VERSION}})
+## 10. Resolved Decisions (v{{VERSION}})
 
 <!-- Fill in with architectural and product decisions made in this version:
 

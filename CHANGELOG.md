@@ -2,6 +2,16 @@
 
 All notable changes to the `prd-generator` plugin are documented in this file.
 
+## [1.3.1] - Validator hotfix and PRD numbering fix
+
+### Fixed
+- **PRD template numbering** is no longer duplicated. Both `multitenant=yes` and `multitenant=no` branches now render `## 1.` through `## 10.` sequentially. Previously, `multitenant=yes` emitted `## 2.` twice (Tenancy & Users + Data Model) and `multitenant=no` emitted `## 5.` twice (API Design + Infrastructure & Operations).
+- **Validator no longer silently skips cross-doc checks for non-Supabase stacks.** `check_cross_doc_consistency`, `check_workflow_anchor_uniqueness`, and `check_rls_lint` were previously gated on the existence of `SUPABASE-PATTERNS.md`. For Yii2/MySQL projects the gate evaluated to false and the validator skipped all three checks, allowing endpoint/model mismatches and unreferenced workflow endpoints to ship undetected. The Supabase-only portions now skip gracefully when the file is absent, while stack-agnostic portions (PRD ↔ endpoints ↔ models, workflow anchor uniqueness) run on every project.
+
+### Known follow-ups
+- Add a `pass-no-supabase` fixture under `tests/quality/` so a future regression of the validator gate is caught by the regression suite. Tracked for v1.4.
+- Add a `## N.` section-number uniqueness check to the validator so a future regression of the template numbering is caught automatically. Tracked for v1.4.
+
 ## [1.3.0] - First public release
 
 ### Added

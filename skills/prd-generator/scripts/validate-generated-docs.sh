@@ -426,6 +426,10 @@ parse_workflow_refs() {
 parse_supabase_policies() {
   local file="$1"
   local out="$2"
+  : > "$out"
+  if [ -z "$file" ] || [ ! -f "$file" ]; then
+    return 0
+  fi
   awk -v sep="$SEP" '
     function flush() {
       if (name != "") {
@@ -822,37 +826,39 @@ check_cross_doc_consistency() {
   parse_supabase_policies "$supabase_file" "$supabase_policies_file"
   parse_prd_access_claims "$prd_file" "$prd_claims_file"
 
-  while IFS="$SEP" read -r name table operation access using with_check enforced; do
-    [ -n "$name" ] || continue
+  if [ -n "$supabase_file" ] && [ -f "$supabase_file" ]; then
+    while IFS="$SEP" read -r name table operation access using with_check enforced; do
+      [ -n "$name" ] || continue
 
-    local sql_row
-    sql_row="$(grep -F "${name}${SEP}" "$supabase_policies_file" | head -n 1 || true)"
-    if [ -z "$sql_row" ]; then
-      echo "policy summary references missing SQL policy [$name] in $models_file"
-      FAILED=1
-      continue
-    fi
+      local sql_row
+      sql_row="$(grep -F "${name}${SEP}" "$supabase_policies_file" | head -n 1 || true)"
+      if [ -z "$sql_row" ]; then
+        echo "policy summary references missing SQL policy [$name] in $models_file"
+        FAILED=1
+        continue
+      fi
 
-    local sql_name sql_line sql_operation sql_access sql_transition sql_enforced sql_using sql_with_check sql_body
-    IFS="$SEP" read -r sql_name sql_line sql_operation sql_access sql_transition sql_enforced sql_using sql_with_check sql_body <<EOF
+      local sql_name sql_line sql_operation sql_access sql_transition sql_enforced sql_using sql_with_check sql_body
+      IFS="$SEP" read -r sql_name sql_line sql_operation sql_access sql_transition sql_enforced sql_using sql_with_check sql_body <<EOF
 $sql_row
 EOF
 
-    if [ -n "$operation" ] && [ "$(normalize_expr "$operation")" != "$(normalize_expr "$sql_operation")" ]; then
-      echo "policy operation mismatch [$name]: models=$operation sql=$sql_operation"
-      FAILED=1
-    fi
+      if [ -n "$operation" ] && [ "$(normalize_expr "$operation")" != "$(normalize_expr "$sql_operation")" ]; then
+        echo "policy operation mismatch [$name]: models=$operation sql=$sql_operation"
+        FAILED=1
+      fi
 
-    if [ -n "$using" ] && [ "$(normalize_expr "$using")" != "$(normalize_expr "$sql_using")" ]; then
-      echo "policy USING mismatch [$name]: models=$using sql=$sql_using"
-      FAILED=1
-    fi
+      if [ -n "$using" ] && [ "$(normalize_expr "$using")" != "$(normalize_expr "$sql_using")" ]; then
+        echo "policy USING mismatch [$name]: models=$using sql=$sql_using"
+        FAILED=1
+      fi
 
-    if [ -n "$with_check" ] && [ "$(normalize_expr "$with_check")" != "$(normalize_expr "$sql_with_check")" ]; then
-      echo "policy WITH CHECK mismatch [$name]: models=$with_check sql=$sql_with_check"
-      FAILED=1
-    fi
-  done < "$model_policies_file"
+      if [ -n "$with_check" ] && [ "$(normalize_expr "$with_check")" != "$(normalize_expr "$sql_with_check")" ]; then
+        echo "policy WITH CHECK mismatch [$name]: models=$with_check sql=$sql_with_check"
+        FAILED=1
+      fi
+    done < "$model_policies_file"
+  fi
 
   while IFS="$SEP" read -r endpoint endpoint_line table policy access fields section description; do
     [ -n "$endpoint" ] || continue
@@ -1374,11 +1380,13 @@ fi
 
 if find "$TARGET_DIR" -type f -name '*-prd-v*.md' | grep -q . && \
    find "$TARGET_DIR" -type f -name 'api-endpoints.md' | grep -q . && \
-   find "$TARGET_DIR" -type f -name 'api-models.md' | grep -q . && \
-   find "$TARGET_DIR" -type f -name 'SUPABASE-PATTERNS.md' | grep -q .; then
+   find "$TARGET_DIR" -type f -name 'api-models.md' | grep -q .; then
   ENDPOINTS_FILE="$(find "$TARGET_DIR" -type f -name 'api-endpoints.md' | sort | head -n 1)"
   MODELS_FILE="$(find "$TARGET_DIR" -type f -name 'api-models.md' | sort | head -n 1)"
-  SUPABASE_FILE="$(find "$TARGET_DIR" -type f -name 'SUPABASE-PATTERNS.md' | sort | head -n 1)"
+  SUPABASE_FILE=""
+  if find "$TARGET_DIR" -type f -name 'SUPABASE-PATTERNS.md' | grep -q .; then
+    SUPABASE_FILE="$(find "$TARGET_DIR" -type f -name 'SUPABASE-PATTERNS.md' | sort | head -n 1)"
+  fi
 
   check_cross_doc_consistency "$PRD_FILE" "$ENDPOINTS_FILE" "$MODELS_FILE" "$SUPABASE_FILE"
   check_workflow_anchor_uniqueness "$PRD_FILE"
