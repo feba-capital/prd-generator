@@ -25,7 +25,7 @@ All notable changes to the `prd-generator` plugin are documented in this file.
 - Removed hardcoded owner default and internal observability domain from the briefing parser. The skill now derives the owner from `git config user.name` or asks.
 - Anonymized the `examples/wisercontent` reference snapshot.
 - Simplified plugin identity: repo, plugin, and marketplace are all `prd-generator`. Dropped the `-v2` and `-marketplace` suffixes used during the migration period.
-- Bumped plugin author to `FEBA Capital` in both Claude and Codex manifests.
+- Bumped plugin author to `FEBACAPITAL` in both Claude and Codex manifests.
 - Replaced rigid `{{#LANGUAGE_IS_PT_BR}}` template blocks with a single English-authored template plus a translation rule.
 
 ### Removed

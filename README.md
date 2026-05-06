@@ -141,7 +141,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the full flow, including how to add a
 
 ## Authors
 
-Created by Bill Madeira and Fabio Espindula at FEBA Capital.
+Created by Bill Madeira and Fabio Espindula at FEBACAPITAL.
 
 Bill wrote the original PRD that became the seed of this plugin. Fabio reverse-engineered its structure into a reusable generator and built the validator, quality gates, stack presets, and multi-language workflow.
 
