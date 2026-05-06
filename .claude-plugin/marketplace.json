@@ -1,17 +1,17 @@
 {
-  "name": "prd-generator-marketplace",
+  "name": "prd-generator",
   "owner": {
-    "name": "Fabio Espindula",
+    "name": "FEBA Capital",
     "email": "fabio@febacapital.com"
   },
   "plugins": [
     {
-      "name": "prd-generator-v2",
+      "name": "prd-generator",
       "source": {
         "source": "github",
-        "repo": "fabioespindula/prd-generator"
+        "repo": "feba-capital/prd-generator"
       },
-      "description": "Formal PRD generation workflow"
+      "description": "Formal PRD generation workflow with explicit command entry, cross-doc validation, and reusable stack presets."
     }
   ]
 }

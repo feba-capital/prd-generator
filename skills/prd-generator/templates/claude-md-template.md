@@ -3,14 +3,14 @@
 
 ## Hallucination Guardrail (read this first)
 
-If you see `TBD`, `Proposed`, or `Assumed` in any doc, STOP and ask Fabio before writing code. Do not invent to fill the gap.
+If you see `TBD`, `Proposed`, or `Assumed` in any doc, STOP and ask the owner before writing code. Do not invent to fill the gap.
 
 - `TBD { blocks_coding: yes, reason: "..." }` -> unknown and blocks coding
 - `TBD { blocks_coding: no, reason: "...", default: "..." }` -> unknown but can wait until deployment
 - `Proposed { promote_when: "..." }` -> skill suggestion, not approved yet
 - `Assumed { question: "...", default: "...", flip_cost: "low|medium|high" }` -> working assumption that still needs confirmation
 
-Never promote a Proposed endpoint, model, integration, or role to Confirmed without explicit approval from Fabio.
+Never promote a Proposed endpoint, model, integration, or role to Confirmed without explicit approval from the owner.
 
 ---
 
@@ -33,10 +33,10 @@ Always use @docs/service-boundaries.md for all domain ownership and module respo
 
 When docs conflict:
 
-1. Fabio (human) overrides everything
+1. The owner (human) overrides everything
 2. PRD overrides stack docs
 3. Stack docs override code conventions
-4. Never reconcile silently → ask Fabio
+4. Never reconcile silently → ask the owner
 
 ---
 

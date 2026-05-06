@@ -6,3 +6,11 @@ projects/*
 prd-generator.plugin
 prd-generator.skill
 test.txt
+
+# Local Claude Code workspace files
+.claude/settings.local.json
+.conductor/
+
+# Internal notes (not for public repo)
+internal/
+postmortem-*.md

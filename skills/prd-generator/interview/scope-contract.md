@@ -1,33 +1,5 @@
-{{#LANGUAGE_IS_PT_BR}}
-## Contrato de Escopo (v1)
-{{/LANGUAGE_IS_PT_BR}}{{^LANGUAGE_IS_PT_BR}}
 ## Scope Contract (v1)
-{{/LANGUAGE_IS_PT_BR}}
 
-{{#LANGUAGE_IS_PT_BR}}
-### O Skateboard
-- Usuário principal: {{PRIMARY_USER}}
-- Dor principal: {{CORE_PAIN}}
-- Declaração de viabilidade: {{VIABILITY_STATEMENT}}
-- Fluxo mínimo: {{MINIMUM_FLOW}}
-- Sinal de sucesso: {{SUCCESS_SIGNAL}}
-- Base de evidência: {{EVIDENCE_BASE}}
-
-### Fora do v1
-{{#OUT_OF_V1_ITEMS}}
-- {{.}}
-{{/OUT_OF_V1_ITEMS}}
-
-### Versões Futuras
-{{#FUTURE_VERSION_ITEMS}}
-- {{.}}
-{{/FUTURE_VERSION_ITEMS}}
-
-### Seções especiais acionadas
-{{#SPECIAL_SECTION_FLAGS}}
-- {{.}}
-{{/SPECIAL_SECTION_FLAGS}}
-{{/LANGUAGE_IS_PT_BR}}{{^LANGUAGE_IS_PT_BR}}
 ### The Skateboard
 - Primary user: {{PRIMARY_USER}}
 - Core pain addressed: {{CORE_PAIN}}
@@ -50,4 +22,12 @@
 {{#SPECIAL_SECTION_FLAGS}}
 - {{.}}
 {{/SPECIAL_SECTION_FLAGS}}
-{{/LANGUAGE_IS_PT_BR}}
+
+<!--
+Translation rule:
+When the chosen language in Step 0 is not English, translate user-facing headings
+("Scope Contract", "The Skateboard", "Out of v1", "Future Versions",
+"Special sections triggered") and field labels ("Primary user", "Core pain
+addressed", etc.) into the chosen language. Keep technical terms and template
+placeholders unchanged.
+-->

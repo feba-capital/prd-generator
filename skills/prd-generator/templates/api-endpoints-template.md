@@ -4,10 +4,10 @@ All endpoints use the `/api/v{{VERSION}}/` prefix. Responses follow the standard
 
 This file is split into two sections:
 
-- `# Confirmed Endpoints` -> derived from explicit user flows and Fabio's confirmed decisions
+- `# Confirmed Endpoints` -> derived from explicit user flows and the owner's confirmed decisions
 - `# Proposed Endpoints` -> skill inference that still needs explicit promotion
 
-Never move an endpoint from Proposed to Confirmed without Fabio's approval.
+Never move an endpoint from Proposed to Confirmed without the owner's approval.
 
 ---
 
@@ -212,7 +212,7 @@ Use action-style endpoints only when the flow is explicit in the PRD and the act
 
 # Proposed Endpoints
 
-Skill inference based on MVP scope. Awaiting Fabio's approval. Do not implement these until promoted to Confirmed.
+Skill inference based on MVP scope. Awaiting the owner's approval. Do not implement these until promoted to Confirmed.
 
 ### POST /api/v{{VERSION}}/example
 

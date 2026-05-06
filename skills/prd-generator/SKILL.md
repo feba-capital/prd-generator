@@ -23,7 +23,7 @@ The skill must never recommend an end-of-life or outdated runtime / framework in
 
 ## Core Rule: Do Not Invent Certainty
 
-Anything not explicitly confirmed by Fabio or clearly implied by the briefing must be labeled:
+Anything not explicitly confirmed by the user or clearly implied by the briefing must be labeled:
 
 - `TBD { blocks_coding: yes, reason: "..." }`
 - `TBD { blocks_coding: no, reason: "...", default: "..." }`
@@ -60,10 +60,10 @@ Never fail silently because of filesystem assumptions. Report the final path use
 Generate the complete doc package when enough information is confirmed.
 
 ### `fast-draft`
-Use when Fabio says "just generate it" or wants speed over completeness. Generate anyway, but mark every unresolved piece with the classified `TBD`, `Proposed`, or `Assumed` forms above.
+Use when the user says "just generate it" or wants speed over completeness. Generate anyway, but mark every unresolved piece with the classified `TBD`, `Proposed`, or `Assumed` forms above.
 
 ### `update-existing`
-Use when revising an existing PRD. Preserve confirmed decisions unless Fabio explicitly changes them.
+Use when revising an existing PRD. Preserve confirmed decisions unless the user explicitly changes them.
 
 ---
 
@@ -81,7 +81,7 @@ Confirm these 9 before generating a strong full package:
 8. MVP scope
 9. Non-goals / what stays out of v1.0
 
-If Fabio refuses to answer, switch to `fast-draft` and mark gaps clearly.
+If the user refuses to answer, switch to `fast-draft` and mark gaps clearly.
 
 ---
 
@@ -96,7 +96,9 @@ Options:
 
 1. `English` (default)
 2. `Brazilian Portuguese`
-3. `Other, specify`
+3. `Spanish`
+4. `Chinese (Simplified)`
+5. `Other, specify`
 
 The chosen language applies to:
 
@@ -104,7 +106,9 @@ The chosen language applies to:
 - the generated docs
 - any handoff message to another skill
 
-If the user chooses a language other than English or Brazilian Portuguese, proceed and note the quality caveat. Do not block.
+For all listed languages, translate user-facing PRD section headings, intros, and prose into the chosen language. Keep technical terms in English (PRD, TBD, Proposed, Assumed, BIGINT, RLS, endpoint).
+
+If the user picks "Other, specify", proceed with a quality caveat and do not block.
 
 ### Step 1. Brainstorm-readiness check
 Ask `Is this idea already brainstormed, or still raw?` using `interview/brainstorm-readiness.md`.
@@ -203,7 +207,7 @@ Ask in batches of 2 to 4 only after the formal workflow has been explicitly invo
 - For hybrid stacks, ask the hybrid batch in `interview/questions.md` (repo split + contract ownership)
 
 ### Step 6. Confirm summary before generating
-Show Fabio a short summary:
+Show the user a short summary:
 
 - Name
 - Project type
@@ -228,7 +232,7 @@ Ask whether to:
 
 ### Skip Interview
 
-If Fabio explicitly wants to skip the interview, warn that the package will contain more `TBD { ... }` and `Assumed { ... }` entries and confirm before proceeding.
+If the user explicitly wants to skip the interview, warn that the package will contain more `TBD { ... }` and `Assumed { ... }` entries and confirm before proceeding.
 
 ---
 
@@ -311,8 +315,9 @@ Required interview questions for hybrid (see `interview/questions.md` Batch Hybr
 Use the language chosen in Step 0 for the conversation and generated docs.
 
 - English remains the authoring default.
-- Brazilian Portuguese must translate user-facing headings and intros in the PRD and scope contract.
-- Any other language is accepted with a quality caveat. Do not block generation.
+- For Brazilian Portuguese, Spanish, and Chinese (Simplified): translate user-facing PRD section headings, intros, and prose into that language. Keep technical terms in English (PRD, TBD, Proposed, Assumed, BIGINT, RLS, endpoint, schema, migration).
+- For any other language ("Other, specify"): translate on best effort with a quality caveat. Do not block generation.
+- Templates are written in English. Translation happens at generation time, not via separate templates per language. This keeps templates maintainable and supports any future language without template changes.
 
 ### Formatting
 - **Never use em dash in prose.** Use arrow, comma, period, colon, or rephrase. The punctuation itself is allowed only inside code fences, inline backticks, regex examples, shell examples, or literal "what not to do" references.
@@ -321,13 +326,13 @@ Use the language chosen in Step 0 for the conversation and generated docs.
 - Use classified `TBD` / `Proposed` / `Assumed` labels explicitly
 
 ### IDs
-Default to large integer IDs (BIGINT UNSIGNED for MySQL, BIGSERIAL for Postgres). Never UUIDs unless Fabio explicitly asks.
+Default to large integer IDs (BIGINT UNSIGNED for MySQL, BIGSERIAL for Postgres). Never UUIDs unless the user explicitly asks.
 
 ### Versioning
 First PRD is always `v1.0`. Filename: `{project-slug}-prd-v1.0.md`.
 
 ### Non-goals
-Mandatory. If the briefing doesn't include them, ask. If Fabio refuses, create a `Proposed Non-Goals` section.
+Mandatory. If the briefing doesn't include them, ask. If the user refuses, create a `Proposed Non-Goals` section.
 
 ### Resolved Decisions
 End the main PRD with a numbered `Resolved Decisions` section. Every confirmed choice from the interview appears here.
@@ -385,11 +390,11 @@ Rules:
 ### AGENTS.md must include
 - reading order (which doc to open first, second, third)
 - source-of-truth precedence (PRD > stack docs > code conventions)
-- what to do if docs conflict (ask Fabio, never reconcile silently)
-- how to treat `TBD`, `Proposed`, and `Assumed` (stop and ask Fabio, never fill in)
+- what to do if docs conflict (ask the owner, never reconcile silently)
+- how to treat `TBD`, `Proposed`, and `Assumed` (stop and ask the owner, never fill in)
 
 ### CLAUDE.md must include
-- top-line rule: "If you see TBD, Proposed, or Assumed in any doc, STOP and ask Fabio. Do not invent to fill the gap."
+- top-line rule: "If you see TBD, Proposed, or Assumed in any doc, STOP and ask the owner. Do not invent to fill the gap."
 - pointers to AGENTS.md, PRD, stack docs, API docs
 - update rules for CHANGELOG and README
 
@@ -413,9 +418,9 @@ Rules:
 
 ### api-endpoints.md must separate
 - `## Confirmed Endpoints` (derived from interview + explicit user flows)
-- `## Proposed Endpoints` (skill's inference, awaiting Fabio's approval)
+- `## Proposed Endpoints` (skill's inference, awaiting the owner's approval)
 
-Never mix these two sections. Never promote Proposed → Confirmed without Fabio's explicit approval.
+Never mix these two sections. Never promote Proposed → Confirmed without the owner's explicit approval.
 
 For every endpoint, include:
 
@@ -454,7 +459,7 @@ For each policy summary, use this exact structure:
 1. Run Step 0 language selection.
 2. Run Step 1 brainstorm-readiness check.
 3. Offer Step 2 MVP check. If accepted, assemble the scope contract, run the override pattern, and offer Step 2.5 export.
-4. Confirm summary with Fabio (Step 6 of the interaction workflow).
+4. Confirm summary with the user (Step 6 of the interaction workflow).
 5. Create folder `/projects/{project-slug}/` and its `/docs/` subfolder.
 6. Generate the main PRD (densest file, anchor for everything else).
 7. If Step 2 ran, embed `## Scope Contract (v1)` in the main PRD and save `scope-contract.md` when Step 2.5 requested it.
@@ -467,14 +472,14 @@ For each policy summary, use this exact structure:
 14. Build `## Implementation Readiness` from the actual labels present in the generated package, with source file + line citations.
 15. Resolve runtime and framework versions against the Version Policy before finalizing stack docs or setup steps.
 16. Run `PRD_GENERATOR_ALLOW_LEGACY_LABELS=0 bash skills/prd-generator/scripts/validate-generated-docs.sh <project-root>`.
-17. Run a Cross-Doc Consistency Pass. If any mismatch remains, stop and list every mismatch before asking Fabio to waive anything.
-18. Report to Fabio.
+17. Run a Cross-Doc Consistency Pass. If any mismatch remains, stop and list every mismatch before asking the user to waive anything.
+18. Report to the user.
 
 ---
 
 ## Quality Check (before declaring done)
 
-Run automatically before returning to Fabio. Fail loudly on each issue found.
+Run automatically before returning to the user. Fail loudly on each issue found.
 
 1. **Em dash scan.** Check for em dashes in prose across all generated files. Ignore code fences and inline backticks.
 2. **Placeholder scan.** Flag `Lorem`, `example.com`, `foo bar`, and `TODO`.
@@ -493,7 +498,7 @@ Run automatically before returning to Fabio. Fail loudly on each issue found.
 15. **Scope Decisions justification scan.** Every item under `Scope Decisions` must include a non-empty `reason`.
 16. **Validation Plan completeness scan.** If `Validation Plan` exists, sample size, time window, success metric, and kill threshold must all be present.
 
-Do not declare the task complete until all 16 checks pass or Fabio explicitly waives a specific failing item.
+Do not declare the task complete until all 16 checks pass or the user explicitly waives a specific failing item.
 
 ---
 
@@ -517,7 +522,7 @@ When done, return:
 ### Briefing too vague
 Do not generate a confident PRD. Ask the minimum high-leverage questions first.
 
-### Fabio says "just generate it"
+### User says "just generate it"
 Use `fast-draft`. Be explicit about every `Proposed` and `Assumed`.
 
 ### Stack unfamiliar

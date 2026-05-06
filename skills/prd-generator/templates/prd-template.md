@@ -1,8 +1,13 @@
-{{#LANGUAGE_IS_PT_BR}}
-# {{PROJECT_NAME}} -> Requisitos de Produto v{{VERSION}}
-{{/LANGUAGE_IS_PT_BR}}{{^LANGUAGE_IS_PT_BR}}
+<!--
+Translation rule:
+This template is authored in English. When the language chosen in Step 0 is not
+English (PT-BR, Spanish, Chinese, or Other), translate user-facing section
+headings, intros, and prose into the chosen language at generation time. Keep
+technical terms in English (PRD, TBD, Proposed, Assumed, BIGINT, RLS, endpoint,
+schema, migration). Keep template placeholders ({{...}}) unchanged.
+-->
+
 # {{PROJECT_NAME}} -> Product Requirements v{{VERSION}}
-{{/LANGUAGE_IS_PT_BR}}
 
 **Owner:** {{OWNER}}
 **Stack:** {{STACK_DESCRIPTION}}
@@ -11,28 +16,16 @@
 
 ---
 
-{{#LANGUAGE_IS_PT_BR}}
-## 1. Visão Geral
-{{/LANGUAGE_IS_PT_BR}}{{^LANGUAGE_IS_PT_BR}}
 ## 1. Overview
-{{/LANGUAGE_IS_PT_BR}}
 
 {{PROJECT_TAGLINE}}
 
-{{#LANGUAGE_IS_PT_BR}}
-### 1.1 Objetivos
-{{/LANGUAGE_IS_PT_BR}}{{^LANGUAGE_IS_PT_BR}}
 ### 1.1 Goals
-{{/LANGUAGE_IS_PT_BR}}
 - Primary business objective for this product
 - Secondary objective
 - Tertiary objective
 
-{{#LANGUAGE_IS_PT_BR}}
-### 1.2 Não Objetivos (v{{VERSION}})
-{{/LANGUAGE_IS_PT_BR}}{{^LANGUAGE_IS_PT_BR}}
 ### 1.2 Non-Goals (v{{VERSION}})
-{{/LANGUAGE_IS_PT_BR}}
 - Feature explicitly out of scope
 - Known limitation deferred to v{{VERSION|increment}}
 - Dependency or integration explicitly not supported in v{{VERSION}}
@@ -40,17 +33,9 @@
 ---
 
 {{#STEP2_RAN}}
-{{#LANGUAGE_IS_PT_BR}}
-## Contrato de Escopo (v1)
-{{/LANGUAGE_IS_PT_BR}}{{^LANGUAGE_IS_PT_BR}}
 ## Scope Contract (v1)
-{{/LANGUAGE_IS_PT_BR}}
 
-{{#LANGUAGE_IS_PT_BR}}
-### O Skateboard
-{{/LANGUAGE_IS_PT_BR}}{{^LANGUAGE_IS_PT_BR}}
 ### The Skateboard
-{{/LANGUAGE_IS_PT_BR}}
 - {{SCOPE_CONTRACT_PRIMARY_USER}}
 - {{SCOPE_CONTRACT_CORE_PAIN}}
 - {{SCOPE_CONTRACT_VIABILITY}}
@@ -58,11 +43,7 @@
 - {{SCOPE_CONTRACT_SUCCESS_SIGNAL}}
 - {{SCOPE_CONTRACT_EVIDENCE}}
 
-{{#LANGUAGE_IS_PT_BR}}
-### Fora do v1
-{{/LANGUAGE_IS_PT_BR}}{{^LANGUAGE_IS_PT_BR}}
 ### Out of v1
-{{/LANGUAGE_IS_PT_BR}}
 {{#SCOPE_CONTRACT_OUT_OF_V1}}
 - {{.}}
 {{/SCOPE_CONTRACT_OUT_OF_V1}}
@@ -269,11 +250,7 @@ Cursor-based (`?cursor=&limit=`) with `next_cursor` in response.
 
 ---
 
-{{#MULTITENANT_YES_NO}}
 ## 7. Out of Scope for v{{VERSION}} (Deferred)
-{{/MULTITENANT_YES_NO}}{{^MULTITENANT_YES_NO}}
-## 7. Out of Scope for v{{VERSION}} (Deferred)
-{{/MULTITENANT_YES_NO}}
 
 {{#NON_GOALS}}
 - {{. }}
@@ -286,11 +263,7 @@ Cursor-based (`?cursor=&limit=`) with `next_cursor` in response.
 
 {{#STEP2_RAN}}
 {{#SHOW_FUTURE_VERSIONS}}
-{{#LANGUAGE_IS_PT_BR}}
-## Versões Futuras
-{{/LANGUAGE_IS_PT_BR}}{{^LANGUAGE_IS_PT_BR}}
 ## Future Versions
-{{/LANGUAGE_IS_PT_BR}}
 
 {{#FUTURE_VERSION_ITEMS}}
 - {{title}}. `Proposed { promote_when: "{{promote_when}}" }`
@@ -300,11 +273,7 @@ Cursor-based (`?cursor=&limit=`) with `next_cursor` in response.
 {{/SHOW_FUTURE_VERSIONS}}
 
 {{#SHOW_LAUNCH_DEPENDENCIES}}
-{{#LANGUAGE_IS_PT_BR}}
-## Dependências de Lançamento
-{{/LANGUAGE_IS_PT_BR}}{{^LANGUAGE_IS_PT_BR}}
 ## Launch Dependencies
-{{/LANGUAGE_IS_PT_BR}}
 
 <!-- Use this section only when the skateboard does not stand alone.
 Each bullet should describe one dependency that must ship together with v1.
@@ -317,11 +286,7 @@ Each bullet should describe one dependency that must ship together with v1.
 {{/SHOW_LAUNCH_DEPENDENCIES}}
 {{/STEP2_RAN}}
 
-{{#MULTITENANT_YES_NO}}
 ## 8. Open Questions & Assumptions
-{{/MULTITENANT_YES_NO}}{{^MULTITENANT_YES_NO}}
-## 8. Open Questions & Assumptions
-{{/MULTITENANT_YES_NO}}
 
 <!-- Use only the classified uncertainty labels:
 
@@ -335,11 +300,7 @@ Keep this section compact. Only include real unresolved items.
 
 ---
 
-{{#MULTITENANT_YES_NO}}
 ## 9. Resolved Decisions (v{{VERSION}})
-{{/MULTITENANT_YES_NO}}{{^MULTITENANT_YES_NO}}
-## 9. Resolved Decisions (v{{VERSION}})
-{{/MULTITENANT_YES_NO}}
 
 <!-- Fill in with architectural and product decisions made in this version:
 
@@ -353,11 +314,7 @@ Keep this section compact. Only include real unresolved items.
 ---
 
 {{#SHOW_SCOPE_DECISIONS}}
-{{#LANGUAGE_IS_PT_BR}}
-## Decisões de Escopo
-{{/LANGUAGE_IS_PT_BR}}{{^LANGUAGE_IS_PT_BR}}
 ## Scope Decisions
-{{/LANGUAGE_IS_PT_BR}}
 
 <!-- Each item MUST carry a non-empty reason. Use one block per decision:
 - Feature: ...
@@ -365,72 +322,35 @@ Keep this section compact. Only include real unresolved items.
   Effect on v1: ...
 -->
 {{#SCOPE_DECISIONS}}
-{{#LANGUAGE_IS_PT_BR}}
-- Funcionalidade: {{feature}}
-  Motivo: {{reason}}
-  Efeito no v1: {{effect}}
-{{/LANGUAGE_IS_PT_BR}}{{^LANGUAGE_IS_PT_BR}}
 - Feature: {{feature}}
   Reason: {{reason}}
   Effect on v1: {{effect}}
-{{/LANGUAGE_IS_PT_BR}}
 {{/SCOPE_DECISIONS}}
 
 ---
 {{/SHOW_SCOPE_DECISIONS}}
 
 {{#SHOW_VALIDATION_PLAN}}
-{{#LANGUAGE_IS_PT_BR}}
-## Plano de Validação
-{{/LANGUAGE_IS_PT_BR}}{{^LANGUAGE_IS_PT_BR}}
 ## Validation Plan
-{{/LANGUAGE_IS_PT_BR}}
 
-{{#LANGUAGE_IS_PT_BR}}
-- Tamanho da amostra: {{VALIDATION_PLAN_SAMPLE_SIZE}}
-- Janela de tempo: {{VALIDATION_PLAN_TIME_WINDOW}}
-- Métrica de sucesso: {{VALIDATION_PLAN_SUCCESS_METRIC}}
-- Limite de encerramento: {{VALIDATION_PLAN_KILL_THRESHOLD}}
-{{/LANGUAGE_IS_PT_BR}}{{^LANGUAGE_IS_PT_BR}}
 - Sample size: {{VALIDATION_PLAN_SAMPLE_SIZE}}
 - Time window: {{VALIDATION_PLAN_TIME_WINDOW}}
 - Success metric: {{VALIDATION_PLAN_SUCCESS_METRIC}}
 - Kill threshold: {{VALIDATION_PLAN_KILL_THRESHOLD}}
-{{/LANGUAGE_IS_PT_BR}}
 
 ---
 {{/SHOW_VALIDATION_PLAN}}
 
-{{#LANGUAGE_IS_PT_BR}}
-## Prontidão para Implementação
-{{/LANGUAGE_IS_PT_BR}}{{^LANGUAGE_IS_PT_BR}}
 ## Implementation Readiness
-{{/LANGUAGE_IS_PT_BR}}
 
-{{#LANGUAGE_IS_PT_BR}}
-### Seguro para implementar agora
-{{/LANGUAGE_IS_PT_BR}}{{^LANGUAGE_IS_PT_BR}}
 ### Safe to implement now
-{{/LANGUAGE_IS_PT_BR}}
 - Use concise bullets that cite the exact source line. Example: `Shared open queue is confirmed. (source: docs/{{PROJECT_SLUG}}-prd-v{{VERSION}}.md:42)`
 
-{{#LANGUAGE_IS_PT_BR}}
-### Precisa de decisão explícita antes de codar
-{{/LANGUAGE_IS_PT_BR}}{{^LANGUAGE_IS_PT_BR}}
 ### Needs explicit decision before coding
-{{/LANGUAGE_IS_PT_BR}}
 - Auto-populate from every `TBD { blocks_coding: yes, ... }` and every `Assumed { ... flip_cost: "medium|high" }`
 
-{{#LANGUAGE_IS_PT_BR}}
-### Precisa de decisão antes do deploy (não bloqueia codificação)
-{{/LANGUAGE_IS_PT_BR}}{{^LANGUAGE_IS_PT_BR}}
 ### Needs decision before deployment (non-blocking for coding)
-{{/LANGUAGE_IS_PT_BR}}
 - Auto-populate from every `TBD { blocks_coding: no, ... }`
 
-{{#LANGUAGE_IS_PT_BR}}
-### Intencionalmente adiado desta versão
-{{/LANGUAGE_IS_PT_BR}}{{^LANGUAGE_IS_PT_BR}}
 ### Intentionally deferred from this version
-{{/LANGUAGE_IS_PT_BR}}
 - Auto-populate from every `Proposed { promote_when: "..." }` that explicitly defers to vNext

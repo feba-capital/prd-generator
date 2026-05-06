@@ -1,9 +1,9 @@
 {
-  "name": "prd-generator-v2",
-  "version": "1.2.0",
-  "description": "Formal PRD generation workflow based on international standards, internally adapted by Bill Madeira and structured in this plugin by Fabio",
+  "name": "prd-generator",
+  "version": "1.3.0",
+  "description": "Formal PRD generation workflow with explicit command entry, cross-doc validation, and reusable stack presets.",
   "author": {
-    "name": "Fabio Espindula",
+    "name": "FEBA Capital",
     "email": "fabio@febacapital.com"
   }
 }

@@ -1,142 +1,142 @@
 # Interview Question Bank
 
-Banco de perguntas por campo. Use quando o briefing tem ✗ ou ?. Formule via `AskUserQuestion` tool, em batches de 2-4.
+Question bank by field. Use when the briefing has ✗ or ?. Formulate via the `AskUserQuestion` tool, in batches of 2-4.
 
 ---
 
-## Batch 1 - Fundação (se faltar qualquer um, pergunte juntos)
+## Batch 1 - Foundation (if any are missing, ask together)
 
-### Nome do projeto
-**Q:** "Qual o nome oficial desse projeto?"
-- Livre-text (sem opções). Precisa do slug derivável.
+### Project name
+**Q:** "What is the official name of this project?"
+- Free text (no options). A slug must be derivable.
 
-### Público-alvo principal
-**Q:** "Quem é o principal usuário desse produto?"
-- Opções: CEOs/Founders (interno FEBA) | Funcionários das empresas FEBA | Clientes finais B2B | Clientes finais B2C | Desenvolvedores (devtools) | Other
+### Primary target users
+**Q:** "Who is the primary user of this product?"
+- Options: Internal employees / operators | External B2B customers | End B2C customers | Developers (devtools) | Mixed | Other
 
-### One-liner / problema central
-**Q:** "Em 1 frase: qual o problema principal que esse projeto resolve?"
-- Livre-text. Vai pro campo Tagline do PRD.
+### One-liner / core problem
+**Q:** "In one sentence: what is the main problem this project solves?"
+- Free text. Goes into the Tagline field of the PRD.
 
 ---
 
 ## Batch 2 - Project Type & Stack
 
 ### Project type
-**Q:** "Que tipo de projeto é esse?"
-- Opções: **Fullstack web app** (frontend + backend + DB) | **Backend API only** (sem UI própria, serve APIs) | **Mobile app** (iOS/Android client, com ou sem backend próprio) | **Browser extension** | **CLI tool / script** | **Desktop app** | Other
+**Q:** "What kind of project is this?"
+- Options: **Fullstack web app** (frontend + backend + DB) | **Backend API only** (no UI of its own, serves APIs) | **Mobile app** (iOS/Android client, with or without its own backend) | **Browser extension** | **CLI tool / script** | **Desktop app** | Other
 
-→ Isso decide quais templates rodam:
+→ This decides which templates run:
 - `fullstack web app` → PRD + AGENTS + dev-workflow + api-docs/endpoints/models/controllers + CLAUDE + README + CHANGELOG
-- `backend api only` → igual fullstack, sem docs de UI
-- `mobile app` → PRD + AGENTS + dev-workflow + screens.md + state-model.md + (api-* se tiver backend proprio) + CLAUDE + README + CHANGELOG
+- `backend api only` → same as fullstack, without UI docs
+- `mobile app` → PRD + AGENTS + dev-workflow + screens.md + state-model.md + (api-* if it has its own backend) + CLAUDE + README + CHANGELOG
 - `browser extension` → PRD + AGENTS + dev-workflow + manifest-spec.md + CLAUDE + README + CHANGELOG
 - `cli tool` → PRD + AGENTS + dev-workflow + commands.md + CLAUDE + README + CHANGELOG
-- `desktop app` → PRD + AGENTS + dev-workflow + screens.md + (api-* se cliente-servidor) + CLAUDE + README + CHANGELOG
+- `desktop app` → PRD + AGENTS + dev-workflow + screens.md + (api-* if client-server) + CLAUDE + README + CHANGELOG
 
-### Stack (campo aberto)
-**Q:** "Qual stack você quer usar? Pode ser qualquer coisa."
+### Stack (open field)
+**Q:** "What stack do you want to use? Anything goes."
 
-Texto livre. Fabio descreve: framework, DB, linguagem, libs principais.
-Exemplos de respostas válidas:
+Free text. The user describes: framework, DB, language, main libs.
+Examples of valid answers:
 - "Next.js 16 App Router + Supabase + Vercel"
-- "Rails 7 + Supabase (pra auth) + Postgres + Fly.io"
+- "Rails 7 + Supabase (for auth) + Postgres + Fly.io"
 - "React Native + Expo + Supabase"
 - "Python FastAPI + Postgres + Docker + Fly.io"
 - "Elixir Phoenix + LiveView + Postgres"
 - "Go + Chi router + sqlc + Postgres"
 
-Depois que Fabio responder, **o skill identifica o stack**:
-1. Se **match exato com um preset existente** (yii2-mysql, nextjs-supabase, etc.) → usa o preset direto.
-2. Se **match parcial** (ex: Fabio diz "Next.js + Supabase" → já tem preset) → confirma: "vou usar o preset nextjs-supabase, ok?"
-3. Se **stack novo** (ex: Rails + Supabase, React Native) → avisa: "não tenho preset pronto pra esse stack, vou gerar os docs {STACK}-BEST-PRACTICES.md ad-hoc e salvar como preset novo pra reutilizar. Ok?"
+After the user answers, **the skill identifies the stack**:
+1. If **exact match with an existing preset** (yii2-mysql, nextjs-supabase, etc.) → use the preset directly.
+2. If **partial match** (e.g., user says "Next.js + Supabase" → preset already exists) → confirm: "I'll use the nextjs-supabase preset, ok?"
+3. If **new stack** (e.g., Rails + Supabase, React Native) → notify: "I don't have a ready preset for that stack. I'll generate {STACK}-BEST-PRACTICES.md ad-hoc and save it as a new preset for reuse. Ok?"
 
-**Atalhos rápidos (só mostrar se Fabio pedir):** Next.js/Supabase, Yii2/MySQL.
+**Quick shortcuts (only show if the user asks):** Next.js/Supabase, Yii2/MySQL.
 
-### Hosting & observability (se não óbvio pelo stack)
-**Q:** "Onde roda? Observability?"
-- Livre-text. Defaults por stack:
+### Hosting & observability (if not obvious from the stack)
+**Q:** "Where does it run? Observability?"
+- Free text. Defaults by stack:
   - Next.js → Vercel + Sentry
   - Yii2 → Docker / DigitalOcean + Sentry
-  - Rails → Fly.io ou Heroku + Sentry
+  - Rails → Fly.io or Heroku + Sentry
   - React Native → App Store / Play Store + Sentry
   - Python → Fly.io / Railway + Sentry
-- Fabio pode sobrescrever.
+- The user can override.
 
-### Multi-tenant? (skip se project type = mobile client only, cli tool, desktop app sem servidor)
-**Q:** "Vai ter múltiplas empresas / clientes usando, com isolamento de dados?"
-- Opções: **Sim, row-level** (`tenant_id` em toda tabela, RLS no Postgres, TenantScopeTrait no Yii2) | **Sim, database-level** (1 DB por tenant) | **Não, single-tenant** | Começa single, vou virar multi depois
+### Multi-tenant? (skip if project type = mobile client only, cli tool, desktop app without server)
+**Q:** "Will multiple companies / customers use it with data isolation?"
+- Options: **Yes, row-level** (`tenant_id` on every table, RLS in Postgres, TenantScopeTrait in Yii2) | **Yes, database-level** (1 DB per tenant) | **No, single-tenant** | Starts single, will become multi later
 
 ---
 
 ## Batch 3 - Auth & Roles
 
-### Método de autenticação
-**Q:** "Como usuários fazem login?"
-- Opções: **Email + senha + MFA opcional** (Recommended) | Magic Link (passwordless) | SSO corporativo (Google/Microsoft) | OAuth2 (apps de terceiros) | Supabase Auth built-in | Other
+### Authentication method
+**Q:** "How do users log in?"
+- Options: **Email + password + optional MFA** (Recommended) | Magic Link (passwordless) | Corporate SSO (Google/Microsoft) | OAuth2 (third-party apps) | Supabase Auth built-in | Other
 
-### Roles / permissões
-**Q:** "Modelo de roles?"
-- Opções: **Owner / Admin / Editor / Viewer** (Recommended, mesmo do WiserContent) | **Admin / User** (simples) | **Custom roles** (vou definir depois) | Não tem roles (todos iguais)
-
----
-
-## Batch 4 - Escopo & Entidades
-
-### Entidades core (MVP)
-**Q:** "Quais são as 3-5 entidades principais do sistema? (ex: Lead, Campaign, Submission, Report)"
-- Livre-text. Isso vai pro Data Model do PRD.
-
-### Features MVP v1.0
-**Q:** "Liste 3-6 features que PRECISAM estar no v1.0. (O que o sistema tem que fazer pra ser útil)"
-- Livre-text, em bullets ou vírgulas.
-
-### Non-goals explícitos
-**Q:** "Liste 3-5 coisas que v1.0 NÃO vai ter. (O que fica pra v1.1 ou nunca)"
-- Livre-text. Importante pra evitar scope creep.
+### Roles / permissions
+**Q:** "Roles model?"
+- Options: **Owner / Admin / Editor / Viewer** (Recommended) | **Admin / User** (simple) | **Custom roles** (will define later) | No roles (everyone equal)
 
 ---
 
-## Batch Hybrid - Só se stack é híbrido (frontend stack ≠ backend stack)
+## Batch 4 - Scope & Entities
 
-Rode esse batch APENAS quando o stack tem frontend e backend diferentes (ex: "Next.js frontend + Python FastAPI backend", "React Native + Rails", "Vue + Go Chi").
+### Core entities (MVP)
+**Q:** "What are the 3-5 main entities of the system? (e.g., Lead, Campaign, Submission, Report)"
+- Free text. Goes into the PRD Data Model.
+
+### MVP v1.0 features
+**Q:** "List 3-6 features that MUST be in v1.0. (What the system needs to do to be useful)"
+- Free text, in bullets or commas.
+
+### Explicit non-goals
+**Q:** "List 3-5 things that v1.0 will NOT have. (What waits for v1.1 or never)"
+- Free text. Important to avoid scope creep.
+
+---
+
+## Batch Hybrid - Only if the stack is hybrid (frontend stack ≠ backend stack)
+
+Run this batch ONLY when the stack has different frontend and backend (e.g., "Next.js frontend + Python FastAPI backend", "React Native + Rails", "Vue + Go Chi").
 
 ### Repo layout
-**Q:** "Frontend e backend vão ficar no mesmo repo ou separados?"
-- Opções: **Monorepo (1 repo com pastas frontend/ e backend/)** (Recommended) | Dois repos separados | Frontend consome backend já existente em outro projeto
+**Q:** "Will frontend and backend be in the same repo or separate?"
+- Options: **Monorepo (1 repo with frontend/ and backend/ folders)** (Recommended) | Two separate repos | Frontend consumes a backend that already exists in another project
 
 ### Contract ownership
-**Q:** "Quem define o contrato da API (endpoints, payloads, tipos)?"
-- Opções: **Backend-first** (backend define, frontend consome) (Recommended) | **Contract-first** (OpenAPI spec como fonte de verdade, ambos implementam) | **Frontend-driven** (frontend define o que precisa, backend implementa)
+**Q:** "Who defines the API contract (endpoints, payloads, types)?"
+- Options: **Backend-first** (backend defines, frontend consumes) (Recommended) | **Contract-first** (OpenAPI spec as source of truth, both implement) | **Frontend-driven** (frontend defines what it needs, backend implements)
 
-→ Isso decide quem manda em auth, schema, error envelope, pagination. Sempre backend-first a menos que Fabio escolha outra opção. Vai pra seção "Architecture Split" do PRD.
-
----
-
-## Batch 5 - Integrações
-
-### Integrações externas de CERTEZA
-**Q:** "Quais APIs/serviços externos o MVP JÁ vai usar? (ex: Stripe, OpenAI, Meta Ads)"
-- Livre-text. Marcar como "in scope".
-
-### Integrações POSSÍVEIS (talvez)
-**Q:** "Quais APIs/serviços PODEM entrar mas você ainda não decidiu?"
-- Livre-text. Marcar como "deferred / TBD" no PRD.
+→ This decides who owns auth, schema, error envelope, pagination. Default to backend-first unless the user picks another option. Goes into the "Architecture Split" section of the PRD.
 
 ---
 
-## Pergunta-curinga (se o briefing é vago demais)
+## Batch 5 - Integrations
 
-**Q:** "Qual o cenário concreto de uso? Descreva 1 usuário fazendo 1 ação típica do dia-a-dia nesse sistema."
-- Livre-text. Isso ajuda a extrair entities, flows, e UI implícita.
+### Definite external integrations
+**Q:** "Which APIs/services will the MVP use FOR SURE? (e.g., Stripe, OpenAI, Meta Ads)"
+- Free text. Mark as "in scope".
+
+### Possible integrations (maybe)
+**Q:** "Which APIs/services MIGHT be added but you haven't decided yet?"
+- Free text. Mark as "deferred / TBD" in the PRD.
 
 ---
 
-## Rules de execução
+## Wildcard question (if the briefing is too vague)
 
-- **Batches de 2-4 perguntas por vez.** Não jogue 12 perguntas no Fabio.
-- **Pular perguntas já respondidas no briefing.** Se briefing já diz "Next.js", não pergunte stack.
-- **Sempre marcar opção recomendada primeiro** com "(Recommended)" no label.
-- **Sempre oferecer "Other"** pra ele customizar (automático no AskUserQuestion).
-- **Não perguntar detalhes finos** na entrevista (ex: cor, fonte, nome de tabela). Isso vira TBD no PRD.
-- **Máximo 3 batches** antes de partir pra geração. Se depois disso ainda tem buraco, marque TBD.
+**Q:** "What is the concrete usage scenario? Describe one user doing one typical day-to-day action in this system."
+- Free text. Helps extract entities, flows, and implicit UI.
+
+---
+
+## Execution rules
+
+- **Batches of 2-4 questions at a time.** Do not dump 12 questions on the user.
+- **Skip questions already answered in the briefing.** If the briefing already says "Next.js", do not ask the stack question.
+- **Always mark the recommended option first** with "(Recommended)" in the label.
+- **Always offer "Other"** so the user can customize (automatic in `AskUserQuestion`).
+- **Do not ask fine details** in the interview (e.g., color, font, table name). Those become TBD in the PRD.
+- **Maximum 3 batches** before moving to generation. If gaps remain after that, mark them as TBD.

@@ -1,6 +1,6 @@
 # WiserContent Content Platform API
 
-API-first, multi-tenant content generation and publishing platform for Feba Capital portfolio companies.
+API-first, multi-tenant content generation and publishing platform for Acme Inc portfolio companies.
 
 ## Features
 - Multi-tenant Yii2 API with strict `tenant_id` scoping

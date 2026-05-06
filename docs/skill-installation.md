@@ -7,8 +7,8 @@
 
 ## Recommended Installation
 - The supported distribution path for Claude is the GitHub marketplace defined in `.claude-plugin/marketplace.json`.
-- Publish changes to the repository, then add or refresh the marketplace from `fabioespindula/prd-generator`.
-- Install `prd-generator-v2` from `prd-generator-marketplace`.
+- Publish changes to the repository, then add or refresh the marketplace from `feba-capital/prd-generator`.
+- Install `prd-generator` from the `prd-generator` marketplace.
 
 ## Local Packaging
 - Local packaged artifacts are optional and exist only for development, testing, or manual distribution.

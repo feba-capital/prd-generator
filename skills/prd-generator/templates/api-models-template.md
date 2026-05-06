@@ -1,12 +1,12 @@
 # API Models Reference
 
-All IDs are stack-appropriate integers unless Fabio explicitly asks for another format. Timestamps should match the stack conventions documented in the chosen preset.
+All IDs are stack-appropriate integers unless the owner explicitly asks for another format. Timestamps should match the stack conventions documented in the chosen preset.
 
 ---
 
 ## Confirmed Models
 
-List only Fabio-approved entities here. Every property that appears in `api-endpoints.md` request/response bodies must exist in one of these tables.
+List only owner-approved entities here. Every property that appears in `api-endpoints.md` request/response bodies must exist in one of these tables.
 
 ### {{CORE_ENTITIES|first|titleize}}
 
@@ -44,7 +44,7 @@ List only Fabio-approved entities here. Every property that appears in `api-endp
 
 ## Proposed Models
 
-Skill inference based on MVP scope. Awaiting Fabio's approval. Do not implement until promoted.
+Skill inference based on MVP scope. Awaiting the owner's approval. Do not implement until promoted.
 
 ---
 

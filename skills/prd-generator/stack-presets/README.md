@@ -63,7 +63,7 @@ Files:
 
 **Slug:** `nextjs-supabase`
 **Tech:** Next.js 16 (latest stable as of 2026-04, 16.2.3 or later, App Router), TypeScript, Supabase Postgres (RLS), Tailwind CSS, Vercel
-**For:** Full-stack modern apps, multi-tenant SaaS (Fabio preference)
+**For:** Full-stack modern apps, multi-tenant SaaS
 
 Files:
 - `PRESET.md`

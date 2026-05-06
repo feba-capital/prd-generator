@@ -2,9 +2,26 @@
 
 All notable changes to the `prd-generator` plugin are documented in this file.
 
-## [Unreleased]
+## [1.3.0] - First public release
 
-## Sprint 2: v2 Flow Redesign
+### Added
+- LICENSE file (MIT) for public distribution.
+- CONTRIBUTING.md with test, preset, and commit conventions.
+- Multi-language Step 0 selection covering English, Brazilian Portuguese, Spanish, Chinese (Simplified), and a user-specified fallback. Translation now happens at generation time instead of via per-language template blocks.
+
+### Changed
+- Removed personal references from the skill, templates, interview prompts, and test fixtures. Generated PRDs now refer to "the owner" / "the user" instead of a hardcoded individual name.
+- Translated `briefing-parser.md` and `questions.md` from Portuguese to English. Generalized example public-target options.
+- Removed hardcoded owner default and internal observability domain from the briefing parser. The skill now derives the owner from `git config user.name` or asks.
+- Anonymized the `examples/wisercontent` reference snapshot.
+- Simplified plugin identity: repo, plugin, and marketplace are all `prd-generator`. Dropped the `-v2` and `-marketplace` suffixes used during the migration period.
+- Bumped plugin author to `FEBA Capital` in both Claude and Codex manifests.
+- Replaced rigid `{{#LANGUAGE_IS_PT_BR}}` template blocks with a single English-authored template plus a translation rule.
+
+### Removed
+- Internal incident postmortem from the repository root.
+
+## [1.2.0] - Sprint 2: v2 Flow Redesign
 
 ### Added
 - Added Step 0 language selection so the PRD workflow can run in English, Brazilian Portuguese, or a user-specified language with a quality caveat.
@@ -15,7 +32,7 @@ All notable changes to the `prd-generator` plugin are documented in this file.
 
 ### Changed
 - Updated the main PRD template to emit `Future Versions`, `Launch Dependencies`, `Validation Plan`, and `Scope Decisions` only when the Step 2 signals require them.
-- Updated the validator to understand PT-BR PRD headings and readiness sections while keeping backward compatibility for pre-Sprint 2 English packages such as Orchestrix.
+- Updated the validator to understand PT-BR PRD headings and readiness sections while keeping backward compatibility for pre-Sprint 2 English packages.
 - Minor-bumped the plugin for the v2 entry-flow redesign and the expanded 16-gate quality check.
 
 ## Sprint 1.5: Validator Hardening
@@ -34,7 +51,6 @@ All notable changes to the `prd-generator` plugin are documented in this file.
 - Added a Version Policy to the skill so generated docs prefer the current stable or LTS runtime and framework versions, and stale preset hardcodes are no longer treated as safe defaults.
 - Updated the `nextjs-supabase` preset to target the current Node.js LTS line and the current Next.js stable line instead of outdated guidance.
 - Added a version currency check to the validator so bare or stale Node / Next.js references fail the quality gate.
-- Updated default owner labeling in generated docs to `**Owner:** Fabio Espindula - FEBACAPITAL`.
 
 ### Added
 - Sprint 1 quality gate coverage for Finding 1: cross-doc consistency checks across PRD workflows, endpoint contracts, model fields, and Supabase RLS summaries.

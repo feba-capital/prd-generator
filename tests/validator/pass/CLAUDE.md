@@ -5,7 +5,7 @@ Use @docs/AGENTS.md before coding.
 Start with @docs/sample-prd-v1.0.md.
 
 ## Authority Hierarchy
-Fabio overrides generated docs.
+The owner overrides generated docs.
 
 ## Maintenance Rules
 Update README.md and CHANGELOG.md when needed.
