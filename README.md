@@ -141,9 +141,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the full flow, including how to add a
 
 ## Authors
 
-Created by Fabio Espindula and Bill Madeira at FEBA Capital.
+Created by Bill Madeira and Fabio Espindula at FEBA Capital.
 
-Bill compiled the original PRD practices from common industry patterns. Fabio designed the current architecture, validation framework, quality gates, stack presets, and workflow.
+Bill wrote the original PRD that became the seed of this plugin. Fabio reverse-engineered its structure into a reusable generator and built the validator, quality gates, stack presets, and multi-language workflow.
 
 ## License
 
